@@ -1,0 +1,103 @@
+# AWS CloudTrail Security Rules
+# Plugin: cloudtrail
+# Source: aws_cloudtrail
+
+- list: aws_sensitive_operations
+  items:
+    - DeleteTrail
+    - StopLogging
+    - UpdateTrail
+    - PutEventSelectors
+    - DeleteFlowLogs
+    - DeleteVpc
+
+- list: aws_console_login_sources
+  items:
+    - Console
+    - ConsoleLogin
+
+- macro: aws_cloudtrail_error
+  condition: ct.error != "<NA>"
+
+- macro: sensitive_aws_action
+  condition: ct.name in (aws_sensitive_operations)
+
+# Detect Console Login without MFA
+- rule: AWS Console Login Without MFA
+  desc: Detect AWS console login without multi-factor authentication
+  condition: >
+    ct.name = "ConsoleLogin" and
+    ct.error = "<NA>"
+  output: >
+    AWS console login without MFA 
+    (user=%ct.user region=%ct.region source_ip=%ct.srcip)
+  priority: WARNING
+  source: aws_cloudtrail
+  tags: [aws, authentication, mfa]
+
+# Detect CloudTrail Stopped
+- rule: AWS CloudTrail Logging Stopped
+  desc: Detect when CloudTrail logging is stopped or deleted
+  condition: >
+    ct.name in ("StopLogging", "DeleteTrail") and
+    ct.error = "<NA>"
+  output: >
+    CloudTrail logging stopped or deleted 
+    (user=%ct.user action=%ct.name region=%ct.region)
+  priority: CRITICAL
+  source: aws_cloudtrail
+  tags: [aws, compliance, logging]
+
+# Detect S3 Bucket Made Public
+- rule: AWS S3 Bucket Made Public
+  desc: Detect when an S3 bucket ACL is changed to allow public access
+  condition: >
+    ct.name in ("PutBucketAcl", "PutBucketPolicy") and
+    ct.error = "<NA>" and
+    s3.bucket != ""
+  output: >
+    S3 bucket ACL/policy modified 
+    (user=%ct.user bucket=%s3.bucket action=%ct.name)
+  priority: WARNING
+  source: aws_cloudtrail
+  tags: [aws, s3, public-access]
+
+# Detect EC2 Security Group Changes
+- rule: AWS Security Group Modified
+  desc: Detect modifications to EC2 security groups
+  condition: >
+    ct.name in ("AuthorizeSecurityGroupIngress", "AuthorizeSecurityGroupEgress", 
+                "RevokeSecurityGroupIngress", "RevokeSecurityGroupEgress") and
+    ct.error = "<NA>"
+  output: >
+    Security group modified 
+    (user=%ct.user action=%ct.name region=%ct.region)
+  priority: NOTICE
+  source: aws_cloudtrail
+  tags: [aws, ec2, network]
+
+# Detect IAM User Creation
+- rule: AWS IAM User Created
+  desc: Detect when new IAM users are created
+  condition: >
+    ct.name = "CreateUser" and
+    ct.error = "<NA>"
+  output: >
+    New IAM user created 
+    (created_by=%ct.user region=%ct.region)
+  priority: NOTICE
+  source: aws_cloudtrail
+  tags: [aws, iam, user-management]
+
+# Detect Root Account Usage
+- rule: AWS Root Account Activity
+  desc: Detect usage of the AWS root account
+  condition: >
+    ct.user.identitytype = "Root" and
+    ct.error = "<NA>"
+  output: >
+    AWS root account activity detected 
+    (action=%ct.name region=%ct.region source_ip=%ct.srcip)
+  priority: CRITICAL
+  source: aws_cloudtrail
+  tags: [aws, root, privileged]

@@ -1,0 +1,6 @@
+{
+  "source": "https://raw.githubusercontent.com/falcosecurity/falco/master/userspace/engine/rule_json_schema.h",
+  "syncedAt": "2026-01-09T13:35:16.646Z",
+  "schemaVersion": "http://json-schema.org/draft-06/schema#",
+  "definitionCount": 8
+}

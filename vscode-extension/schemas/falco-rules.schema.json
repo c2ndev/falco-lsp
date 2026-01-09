@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/FalcoRule"
+  },
+  "definitions": {
+    "FalcoRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required_engine_version": {
+          "type": "string"
+        },
+        "required_plugin_versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RequiredPluginVersion"
+          }
+        },
+        "macro": {
+          "type": "string"
+        },
+        "condition": {
+          "type": "string"
+        },
+        "list": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Item"
+          }
+        },
+        "rule": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "output": {
+          "type": "string"
+        },
+        "append": {
+          "type": "boolean"
+        },
+        "priority": {
+          "$ref": "#/definitions/Priority"
+        },
+        "capture": {
+          "type": "boolean"
+        },
+        "capture_duration": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string"
+        },
+        "exceptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Exception"
+          }
+        },
+        "override": {
+          "$ref": "#/definitions/Override"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [],
+      "title": "FalcoRule",
+      "description": "A Falco rule, macro, list, or version requirement"
+    },
+    "Item": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "title": "Item"
+    },
+    "Exception": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "fields": {},
+        "comps": {},
+        "values": {}
+      },
+      "required": ["name"],
+      "title": "Exception",
+      "description": "Exception to exclude specific cases from rule detection"
+    },
+    "Priority": {
+      "type": "string",
+      "enum": [
+        "EMERGENCY",
+        "ALERT",
+        "CRITICAL",
+        "ERROR",
+        "WARNING",
+        "NOTICE",
+        "INFO",
+        "INFORMATIONAL",
+        "DEBUG"
+      ],
+      "title": "Priority",
+      "description": "Rule priority/severity level"
+    },
+    "OverriddenItem": {
+      "type": "string",
+      "enum": ["append", "replace"],
+      "title": "Priority"
+    },
+    "Override": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "desc": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "condition": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "output": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "priority": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "enabled": {
+          "$ref": "#/definitions/OverriddenItem"
+        },
+        "exceptions": {
+          "$ref": "#/definitions/OverriddenItem"
+        }
+      },
+      "minProperties": 1,
+      "title": "Override",
+      "description": "Override specific properties of an existing rule"
+    },
+    "RequiredPluginVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Alternative"
+          }
+        }
+      },
+      "required": ["name", "version"],
+      "title": "RequiredPluginVersion"
+    },
+    "Alternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "version"],
+      "title": "Alternative"
+    }
+  },
+  "$id": "https://falco.org/schemas/falco-rules.schema.json",
+  "title": "Falco Rules",
+  "description": "Official JSON Schema for Falco security rules. Auto-synced from falcosecurity/falco repository."
+}

@@ -1,0 +1,36 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+coverage/
+.turbo/
+*.tsbuildinfo
+.vscode-test/
+*.vsix
+instructions/
+
+# Go build artifacts
+falco-lsp/bin/
+falco-lsp/build/
+falco-lsp/falco-lang
+falco-lsp/coverage.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Analysis files (generated)
+*_ANALYSIS.md
+*ANALYSIS*.md
+*_STATUS*.md
+*_VERIFICATION*.md
+
+# Package managers - use npm for vscode-extension
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

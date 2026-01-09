@@ -1,0 +1,1818 @@
+{
+  "cloudtrail": [
+    {
+      "name": "ct.addendum.originaleventid",
+      "type": "string",
+      "category": "ct",
+      "description": "The original event ID.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.addendum.originalrequestid",
+      "type": "string",
+      "category": "ct",
+      "description": "The original unique ID of the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.addendum.reason",
+      "type": "string",
+      "category": "ct",
+      "description": "The reason that the event or some of its contents were missing.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.addendum.updatedfields",
+      "type": "string",
+      "category": "ct",
+      "description": "The event record fields that are updated by the addendum.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.additionaleventdata",
+      "type": "string",
+      "category": "ct",
+      "description": "All additional event data attributes.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.apiversion",
+      "type": "string",
+      "category": "ct",
+      "description": "The API version associated with the AwsApiCall eventType value.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.edgedevicedetails",
+      "type": "string",
+      "category": "ct",
+      "description": "Information about edge devices that are targets of a request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.error",
+      "type": "string",
+      "category": "ct",
+      "description": "The error code from the event. Will be \\",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.errormessage",
+      "type": "string",
+      "category": "ct",
+      "description": "The description of an error. Will be \\",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.eventcategory",
+      "type": "string",
+      "category": "ct",
+      "description": "Shows the event category that is used in LookupEvents calls.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.eventtype",
+      "type": "string",
+      "category": "ct",
+      "description": "Identifies the type of event that generated the event record.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.id",
+      "type": "string",
+      "category": "ct",
+      "description": "the unique ID of the cloudtrail event (eventID in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.info",
+      "type": "string",
+      "category": "ct",
+      "description": "summary information about the event. This varies depending on the event type and, for some events, it contains event-specific details.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.managementevent",
+      "type": "string",
+      "category": "ct",
+      "description": "'true' if the event is a management event (AwsApiCall, AwsConsoleAction, AwsConsoleSignIn, or AwsServiceEvent), 'false' otherwise.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.name",
+      "type": "string",
+      "category": "ct",
+      "description": "the name of the cloudtrail event (eventName in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.readonly",
+      "type": "string",
+      "category": "ct",
+      "description": "'true' if the event only reads information (e.g. DescribeInstances), 'false' if the event modifies the state (e.g. RunInstances, CreateLoadBalancer...).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.recipientaccountid",
+      "type": "string",
+      "category": "ct",
+      "description": "The account ID that received this event.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.region",
+      "type": "string",
+      "category": "ct",
+      "description": "the region of the cloudtrail event (awsRegion in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request",
+      "type": "string",
+      "category": "ct",
+      "description": "All request parameters.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.availabilityzone",
+      "type": "string",
+      "category": "ct",
+      "description": "the availability zone included in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.cluster",
+      "type": "string",
+      "category": "ct",
+      "description": "the cluster included in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.functionname",
+      "type": "string",
+      "category": "ct",
+      "description": "the function name included in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.groupname",
+      "type": "string",
+      "category": "ct",
+      "description": "the group name included in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.host",
+      "type": "string",
+      "category": "ct",
+      "description": "the host included in the request",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.name",
+      "type": "string",
+      "category": "ct",
+      "description": "the name of the entity being acted on in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.policy",
+      "type": "string",
+      "category": "ct",
+      "description": "the policy included in the request",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.serialnumber",
+      "type": "string",
+      "category": "ct",
+      "description": "the serial number provided in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.servicename",
+      "type": "string",
+      "category": "ct",
+      "description": "the service name provided in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.subnetid",
+      "type": "string",
+      "category": "ct",
+      "description": "the subnet ID provided in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.taskdefinition",
+      "type": "string",
+      "category": "ct",
+      "description": "the task definition prrovided in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.request.username",
+      "type": "string",
+      "category": "ct",
+      "description": "the username provided in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.requestid",
+      "type": "string",
+      "category": "ct",
+      "description": "The value that identifies the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.resources",
+      "type": "string",
+      "category": "ct",
+      "description": "A list of resources accessed in the event.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.response",
+      "type": "string",
+      "category": "ct",
+      "description": "All response elements.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.response.reservationid",
+      "type": "string",
+      "category": "ct",
+      "description": "the reservation ID included in the response.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.response.subnetid",
+      "type": "string",
+      "category": "ct",
+      "description": "the subnet ID included in the response.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.serviceeventdetails",
+      "type": "string",
+      "category": "ct",
+      "description": "Identifies the service event, including what triggered the event and the result.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.sessioncredentialfromconsole",
+      "type": "string",
+      "category": "ct",
+      "description": "Shows whether or not an event originated from an AWS Management Console session.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.sharedeventid",
+      "type": "string",
+      "category": "ct",
+      "description": "GUID generated by CloudTrail to uniquely identify CloudTrail events.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.shortsrc",
+      "type": "string",
+      "category": "ct",
+      "description": "the source of the cloudtrail event (eventSource in the json, without the '.amazonaws.com' trailer).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.src",
+      "type": "string",
+      "category": "ct",
+      "description": "the source of the cloudtrail event (eventSource in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.srcip",
+      "type": "string",
+      "category": "ct",
+      "description": "the IP address generating the event (sourceIPAddress in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.time",
+      "type": "string",
+      "category": "ct",
+      "description": "the timestamp of the cloudtrail event (eventTime in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.tlsdetails.ciphersuite",
+      "type": "string",
+      "category": "ct",
+      "description": "The cipher suite (combination of security algorithms used) of a request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.tlsdetails.clientprovidedhostheader",
+      "type": "string",
+      "category": "ct",
+      "description": "The client-provided host name used in the service API call.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.tlsdetails.tlsversion",
+      "type": "string",
+      "category": "ct",
+      "description": "The TLS version of a request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.user",
+      "type": "string",
+      "category": "ct",
+      "description": "the user of the cloudtrail event (userIdentity.userName in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.user.accountid",
+      "type": "string",
+      "category": "ct",
+      "description": "the account id of the user of the cloudtrail event.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.user.arn",
+      "type": "string",
+      "category": "ct",
+      "description": "the Amazon Resource Name (ARN) of the user that made the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.user.identitytype",
+      "type": "string",
+      "category": "ct",
+      "description": "the kind of user identity (e.g. Root, IAMUser,AWSService, etc.)",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.user.principalid",
+      "type": "string",
+      "category": "ct",
+      "description": "A unique identifier for the user that made the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.useragent",
+      "type": "string",
+      "category": "ct",
+      "description": "the user agent generating the event (userAgent in the json).",
+      "isDynamic": false
+    },
+    {
+      "name": "ct.vpcendpointid",
+      "type": "string",
+      "category": "ct",
+      "description": "Identifies the VPC endpoint in which requests were made.",
+      "isDynamic": false
+    },
+    {
+      "name": "ec2.imageid",
+      "type": "string",
+      "category": "ec2",
+      "description": "the ID for the image used to run the ec2 instance in the response.",
+      "isDynamic": false
+    },
+    {
+      "name": "ec2.name",
+      "type": "string",
+      "category": "ec2",
+      "description": "the name of the ec2 instances, typically stored in the instance tags.",
+      "isDynamic": false
+    },
+    {
+      "name": "ecr.imagetag",
+      "type": "string",
+      "category": "ecr",
+      "description": "the tag of the image specified in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "ecr.repository",
+      "type": "string",
+      "category": "ecr",
+      "description": "the name of the ecr Repository specified in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "iam.policy",
+      "type": "string",
+      "category": "iam",
+      "description": "the IAM policy specified in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "iam.role",
+      "type": "string",
+      "category": "iam",
+      "description": "the IAM role specified in the request.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.bucket",
+      "type": "string",
+      "category": "s3",
+      "description": "the bucket name for s3 events.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.bytes",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the size of an s3 download or upload, in bytes.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.bytes.in",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the size of an s3 upload, in bytes.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.bytes.out",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the size of an s3 download, in bytes.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.cnt.get",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the number of get operations. This field is 1 for GetObject events, 0 otherwise.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.cnt.other",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the number of non I/O operations. This field is 0 for GetObject and PutObject events, 1 for all the other events.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.cnt.put",
+      "type": "uint64",
+      "category": "s3",
+      "description": "the number of put operations. This field is 1 for PutObject events, 0 otherwise.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.key",
+      "type": "string",
+      "category": "s3",
+      "description": "the S3 key name.",
+      "isDynamic": false
+    },
+    {
+      "name": "s3.uri",
+      "type": "string",
+      "category": "s3",
+      "description": "the s3 URI (s3://<bucket>/<key>).",
+      "isDynamic": false
+    }
+  ],
+  "okta": [
+    {
+      "name": "okta.actor.alternateid",
+      "type": "string",
+      "category": "okta",
+      "description": "Actor Alternate ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.actor.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Actor ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.actor.name",
+      "type": "string",
+      "category": "okta",
+      "description": "Actor Display Name",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.actor.Type",
+      "type": "string",
+      "category": "okta",
+      "description": "Actor Type",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.app",
+      "type": "string",
+      "category": "okta",
+      "description": "Application",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.authentication.credentialprovider",
+      "type": "string",
+      "category": "okta",
+      "description": "Credential Provider",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.authentication.provider",
+      "type": "string",
+      "category": "okta",
+      "description": "Authentication Provider",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.authentication.sessionid",
+      "type": "string",
+      "category": "okta",
+      "description": "External Session ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.authentication.step",
+      "type": "string",
+      "category": "okta",
+      "description": "Authentication Step",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.behaviors",
+      "type": "string",
+      "category": "okta",
+      "description": "Behaviors",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.device",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Device",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.city",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical City",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.country",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical Country",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.lat",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical Latitude",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.lon",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical Longitude",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.postalcode",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical Postal Code",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.geo.state",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Geographical State",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Client ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.ip",
+      "type": "string",
+      "category": "okta",
+      "description": "Client IP Address",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.client.zone",
+      "type": "string",
+      "category": "okta",
+      "description": "Client Zone",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.evt.legacytype",
+      "type": "string",
+      "category": "okta",
+      "description": "Event Legacy Type",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.evt.type",
+      "type": "string",
+      "category": "okta",
+      "description": "Event Type",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.logonlysecuritydata",
+      "type": "string",
+      "category": "okta",
+      "description": "Log Only Security Data",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.message",
+      "type": "string",
+      "category": "okta",
+      "description": "Message",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.mfa.deny.countlast",
+      "type": "uint64",
+      "category": "okta",
+      "description": "Count of MFA denies in last seconds",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.mfa.failure.countlast",
+      "type": "uint64",
+      "category": "okta",
+      "description": "Count of MFA failures in last seconds",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.org",
+      "type": "string",
+      "category": "okta",
+      "description": "Organization",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.principal.alternateid",
+      "type": "string",
+      "category": "okta",
+      "description": "Principal Alternate ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.principal.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Principal ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.principal.name",
+      "type": "string",
+      "category": "okta",
+      "description": "Principal Name",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.principal.type",
+      "type": "string",
+      "category": "okta",
+      "description": "Principal Type",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.published",
+      "type": "string",
+      "category": "okta",
+      "description": "Event Source Timestamp",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.reason",
+      "type": "string",
+      "category": "okta",
+      "description": "Outcome Reason",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.requesturi",
+      "type": "string",
+      "category": "okta",
+      "description": "Request URI",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.result",
+      "type": "string",
+      "category": "okta",
+      "description": "Outcome Result",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.security.asnumber",
+      "type": "uint64",
+      "category": "okta",
+      "description": "Security AS Number",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.security.asorg",
+      "type": "string",
+      "category": "okta",
+      "description": "Security AS Org",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.security.domain",
+      "type": "string",
+      "category": "okta",
+      "description": "Security Domain",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.security.isp",
+      "type": "string",
+      "category": "okta",
+      "description": "Security ISP",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.security.isproxy",
+      "type": "string",
+      "category": "okta",
+      "description": "Is Proxy",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.severity",
+      "type": "string",
+      "category": "okta",
+      "description": "Severity",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.app.alternateid",
+      "type": "string",
+      "category": "okta",
+      "description": "Target App Alternate ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.displayName",
+      "type": "string",
+      "category": "okta",
+      "description": "Target Display Name",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.group.alternateid",
+      "type": "string",
+      "category": "okta",
+      "description": "Target Group Alternate ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.group.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Target Group ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.group.name",
+      "type": "string",
+      "category": "okta",
+      "description": "Target Group Name",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.user.alternateid",
+      "type": "string",
+      "category": "okta",
+      "description": "Target User Alternate ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.user.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Target User ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.target.user.name",
+      "type": "string",
+      "category": "okta",
+      "description": "Target User Name",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.transaction.id",
+      "type": "string",
+      "category": "okta",
+      "description": "Transaction ID",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.transaction.type",
+      "type": "string",
+      "category": "okta",
+      "description": "Transaction Type",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.useragent.browser",
+      "type": "string",
+      "category": "okta",
+      "description": "Useragent Browser",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.useragent.os",
+      "type": "string",
+      "category": "okta",
+      "description": "Useragent OS",
+      "isDynamic": false
+    },
+    {
+      "name": "okta.useragent.raw",
+      "type": "string",
+      "category": "okta",
+      "description": "Raw Useragent",
+      "isDynamic": false
+    }
+  ],
+  "github": [
+    {
+      "name": "github.action",
+      "type": "string",
+      "category": "github",
+      "description": "The github event action. This field typically qualifies the github.type field. For example, a message of type 'star' can have action 'created' or 'deleted'.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.collaborator.name",
+      "type": "string",
+      "category": "github",
+      "description": "The member name for message that add or remove users.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.collaborator.role",
+      "type": "string",
+      "category": "github",
+      "description": "The member name for message that add or remove users.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.commit.added",
+      "type": "string",
+      "category": "github",
+      "description": "Comma separated list of files that have been added.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.commit.modified",
+      "type": "string",
+      "category": "github",
+      "description": "Comma separated list of files that have been modified.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.commit.removed",
+      "type": "string",
+      "category": "github",
+      "description": "Comma separated list of files that have been removed.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.diff.committed_secrets.desc",
+      "type": "string",
+      "category": "github",
+      "description": "For push messages, if one of the commits includes one or more secrets (AWS keys, github tokens...), this field contains the description of each of the committed secrets, as a comma separated list.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.diff.committed_secrets.files",
+      "type": "string",
+      "category": "github",
+      "description": "For push messages, if one of the commits includes one or more secrets (AWS keys, github tokens...), this field contains the names of the files in which each of the secrets was committed, as a comma separated list.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.diff.committed_secrets.lines",
+      "type": "string",
+      "category": "github",
+      "description": "For push messages, if one of the commits includes one or more secrets (AWS keys, github tokens...), this field contains the file line positions of the committed secrets, as a comma separated list.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.diff.committed_secrets.links",
+      "type": "string",
+      "category": "github",
+      "description": "For push messages, if one of the commits includes one or more secrets (AWS keys, github tokens...), this field contains the github source code link for each of the committed secrets, as a comma separated list.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.diff.has_secrets",
+      "type": "string",
+      "category": "github",
+      "description": "For push messages, 'true' if the diff of one of the commits contains a secret.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.org",
+      "type": "string",
+      "category": "github",
+      "description": "Name of the organization the git repository belongs to.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.owner",
+      "type": "string",
+      "category": "github",
+      "description": "Name of the repository's owner.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.repo",
+      "type": "string",
+      "category": "github",
+      "description": "(deprecated) URL of the git repository where the event occurred. Github Webhook payloads contain the repository property when the event occurs from activity in a repository.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.repo.description",
+      "type": "string",
+      "category": "github",
+      "description": "Description of the GitHub repository.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.repo.name",
+      "type": "string",
+      "category": "github",
+      "description": "Name of the git repository where the event occurred. Github Webhook payloads contain the repository property when the event occurs from activity in a repository.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.repo.public",
+      "type": "string",
+      "category": "github",
+      "description": "'true' if the repository affected by the action is public. 'false' otherwise.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.repo.url",
+      "type": "string",
+      "category": "github",
+      "description": "URL of the git repository where the event occurred. Github Webhook payloads contain the repository property when the event occurs from activity in a repository.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.type",
+      "type": "string",
+      "category": "github",
+      "description": "Message type, e.g. 'star' or 'repository'.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.user",
+      "type": "string",
+      "category": "github",
+      "description": "Name of the user that triggered the event.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.webhook.id",
+      "type": "string",
+      "category": "github",
+      "description": "When a new webhook has been created, the webhook id.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.webhook.type",
+      "type": "string",
+      "category": "github",
+      "description": "When a new webhook has been created, the webhook type, e.g. 'repository'.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.workflow.filename",
+      "type": "string",
+      "category": "github",
+      "description": "For workflow_run messages, the name of the workflow definition file.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.workflow.has_miners",
+      "type": "string",
+      "category": "github",
+      "description": "For workflow_run messages, 'true' if the a miner has been detected in the workflow definition file.",
+      "isDynamic": false
+    },
+    {
+      "name": "github.workflow.miners.type",
+      "type": "string",
+      "category": "github",
+      "description": "For workflow_run messages, if one or more miners is detected in the workflow definition file, this field contains the type of each of the detected miner, as a comma separated list (e.g. xmrig, stratum).",
+      "isDynamic": false
+    }
+  ],
+  "gcp_audit": [
+    {
+      "name": "gcp.authorizationInfo",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP authorization information affected resource",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.callerIP",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP principal caller IP",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.cloudfunctions.function",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCF name",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.cloudsql.databaseId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP SQL database ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.compute.instanceId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCE instance ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.compute.networkId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP network ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.compute.subnetwork",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP subnetwork name",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.compute.subnetworkId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP subnetwork ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.dns.zone",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP DNS zoned",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.iam.serviceAccount",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP service account",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.iam.serviceAccountId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP IAM unique ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.location",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP region",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.logging.sink",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP logging sink",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.methodName",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP API service method executed",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.policyDelta",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP service resource access policy",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.projectId",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP project ID",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.request",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP API raw request",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.resourceLabels",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP resource labels",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.resourceName",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP resource name",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.resourceType",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP resource type",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.serviceName",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP API service name",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.storage.bucket",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP bucket name",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.time",
+      "type": "string",
+      "category": "gcp",
+      "description": "Timestamp of the event in RFC3339 format",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.user",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP principal email who committed the action",
+      "isDynamic": false
+    },
+    {
+      "name": "gcp.userAgent",
+      "type": "string",
+      "category": "gcp",
+      "description": "GCP principal caller useragent",
+      "isDynamic": false
+    }
+  ],
+  "syscall": [
+    {
+      "name": "container.cni.json",
+      "type": "string",
+      "category": "container",
+      "description": "The container's / pod's CNI result field from the respective pod ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.duration",
+      "type": "reltime",
+      "category": "container",
+      "description": "Number of nanoseconds since container.start_ts.",
+      "isDynamic": false
+    },
+    {
+      "name": "container.full_id",
+      "type": "string",
+      "category": "container",
+      "description": "The full container ID, e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.healthcheck",
+      "type": "string",
+      "category": "container",
+      "description": "The container's health check. Will be the null value (\\",
+      "isDynamic": false
+    },
+    {
+      "name": "container.host_ipc",
+      "type": "bool",
+      "category": "container",
+      "description": "'true' if the container is running in the host IPC namespace, ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.host_network",
+      "type": "bool",
+      "category": "container",
+      "description": "'true' if the container is running in the host network ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.host_pid",
+      "type": "bool",
+      "category": "container",
+      "description": "'true' if the container is running in the host PID namespace, ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.id",
+      "type": "string",
+      "category": "container",
+      "description": "The truncated container ID (first 12 characters), e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.image",
+      "type": "string",
+      "category": "container",
+      "description": "The container image name (e.g. falcosecurity/falco:latest for ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.image.digest",
+      "type": "string",
+      "category": "container",
+      "description": "The container image registry digest (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.image.id",
+      "type": "string",
+      "category": "container",
+      "description": "The container image id (e.g. 6f7e2741b66b). In instances of ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.image.repository",
+      "type": "string",
+      "category": "container",
+      "description": "The container image repository (e.g. falcosecurity/falco). In ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.image.tag",
+      "type": "string",
+      "category": "container",
+      "description": "The container image tag (e.g. stable, latest). In instances of ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.ip",
+      "type": "string",
+      "category": "container",
+      "description": "The container's / pod's primary ip address as retrieved from the ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.label",
+      "type": "string",
+      "category": "container",
+      "description": "Container label. E.g. 'container.label.foo'.",
+      "isDynamic": false
+    },
+    {
+      "name": "container.labels",
+      "type": "string",
+      "category": "container",
+      "description": "Container comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.liveness_probe",
+      "type": "string",
+      "category": "container",
+      "description": "The container's liveness probe. Will be the null value (\\",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount",
+      "type": "string",
+      "category": "container",
+      "description": "Information about a single mount, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount.dest",
+      "type": "string",
+      "category": "container",
+      "description": "The mount destination, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount.mode",
+      "type": "string",
+      "category": "container",
+      "description": "The mount mode, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount.propagation",
+      "type": "string",
+      "category": "container",
+      "description": "The mount propagation value, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount.rdwr",
+      "type": "string",
+      "category": "container",
+      "description": "The mount rdwr value, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mount.source",
+      "type": "string",
+      "category": "container",
+      "description": "The mount source, specified by number (e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.mounts",
+      "type": "string",
+      "category": "container",
+      "description": "A space-separated list of mount information. Each item in the ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.name",
+      "type": "string",
+      "category": "container",
+      "description": "The container name. In instances of userspace container engine ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.privileged",
+      "type": "bool",
+      "category": "container",
+      "description": "'true' for containers running as privileged, 'false' otherwise. ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.readiness_probe",
+      "type": "string",
+      "category": "container",
+      "description": "The container's readiness probe. Will be the null value ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.start_ts",
+      "type": "abstime",
+      "category": "container",
+      "description": "Container start as epoch timestamp in nanoseconds based on ",
+      "isDynamic": false
+    },
+    {
+      "name": "container.type",
+      "type": "string",
+      "category": "container",
+      "description": "The container type, e.g. docker, cri-o, containerd etc.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.deployment.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.deployment.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.deployment.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.deployment.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.ns.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.ns.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.ns.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.ns.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes namespace name. This field is extracted from the ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.cni.json",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod CNI result field from the respective pod ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.full_sandbox_id",
+      "type": "string",
+      "category": "k8s",
+      "description": "The full Kubernetes pod / sandbox ID, e.g ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "[LEGACY] The Kubernetes pod UID, e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.ip",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod ip, same as container.ip field as each ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod label. The label can be accessed either with ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod name. This field is extracted from the ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.sandbox_id",
+      "type": "string",
+      "category": "k8s",
+      "description": "The truncated Kubernetes pod sandbox ID (first 12 characters), ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.pod.uid",
+      "type": "string",
+      "category": "k8s",
+      "description": "The Kubernetes pod UID, e.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rc.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rc.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rc.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rc.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rs.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rs.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rs.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.rs.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.svc.id",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.svc.label",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.svc.labels",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8s.svc.name",
+      "type": "string",
+      "category": "k8s",
+      "description": "Deprecated. Use `k8smeta` plugin instead.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.deployment.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes deployment label. E.g. 'k8smeta.rs.label[foo]'.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.deployment.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes deployment comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.deployment.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes deployment name.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.deployment.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes deployment UID.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.ns.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes namespace label. E.g. 'k8smeta.ns.label[foo]'.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.ns.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes namespace comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.ns.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes namespace name.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.ns.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes namespace UID.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.pod.ip",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes pod ip",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.pod.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes pod label. E.g. 'k8smeta.pod.label[foo]'.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.pod.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes pod comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.pod.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes pod name.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.pod.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes pod UID.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rc.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replication controller label. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rc.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replication controller comma-separated key/value ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rc.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replication controller name.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rc.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replication controller UID.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rs.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replica set label. E.g. 'k8smeta.rs.label[foo]'.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rs.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replica set comma-separated key/value labels. E.g. ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rs.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replica set name.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.rs.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes replica set UID.",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.svc.label",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes services label. If the services associated with the ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.svc.labels",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes services labels. Return a list with all the ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.svc.name",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes services name. Return a list with all the names of ",
+      "isDynamic": false
+    },
+    {
+      "name": "k8smeta.svc.uid",
+      "type": "string",
+      "category": "k8smeta",
+      "description": "Kubernetes services UID. Return a list with all the UIDs of the ",
+      "isDynamic": false
+    },
+    {
+      "name": "proc.is_container_healthcheck",
+      "type": "bool",
+      "category": "proc",
+      "description": "'true' if this process is running as a part of the container's ",
+      "isDynamic": false
+    },
+    {
+      "name": "proc.is_container_liveness_probe",
+      "type": "bool",
+      "category": "proc",
+      "description": "'true' if this process is running as a part of the container's ",
+      "isDynamic": false
+    },
+    {
+      "name": "proc.is_container_readiness_probe",
+      "type": "bool",
+      "category": "proc",
+      "description": "'true' if this process is running as a part of the container's ",
+      "isDynamic": false
+    }
+  ]
+}

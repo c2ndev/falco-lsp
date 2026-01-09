@@ -1,0 +1,800 @@
+[
+  {
+    "name": "container.id",
+    "type": "string",
+    "category": "container",
+    "description": "Container ID",
+    "isDynamic": false
+  },
+  {
+    "name": "container.image",
+    "type": "string",
+    "category": "container",
+    "description": "Container image",
+    "isDynamic": false
+  },
+  {
+    "name": "container.image.digest",
+    "type": "string",
+    "category": "container",
+    "description": "Container image digest",
+    "isDynamic": false
+  },
+  {
+    "name": "container.image.id",
+    "type": "string",
+    "category": "container",
+    "description": "Container image ID",
+    "isDynamic": false
+  },
+  {
+    "name": "container.image.repository",
+    "type": "string",
+    "category": "container",
+    "description": "Container image repository",
+    "isDynamic": false
+  },
+  {
+    "name": "container.image.tag",
+    "type": "string",
+    "category": "container",
+    "description": "Container image tag",
+    "isDynamic": false
+  },
+  {
+    "name": "container.ip",
+    "type": "ipaddr",
+    "category": "container",
+    "description": "Container IP",
+    "isDynamic": false
+  },
+  {
+    "name": "container.mount",
+    "type": "string",
+    "category": "container",
+    "description": "Container mount info",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mount.dest",
+    "type": "string",
+    "category": "container",
+    "description": "Mount destination",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mount.mode",
+    "type": "string",
+    "category": "container",
+    "description": "Mount mode",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mount.propagation",
+    "type": "string",
+    "category": "container",
+    "description": "Mount propagation",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mount.rdwr",
+    "type": "string",
+    "category": "container",
+    "description": "Mount read/write mode",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mount.source",
+    "type": "string",
+    "category": "container",
+    "description": "Mount source",
+    "isDynamic": true
+  },
+  {
+    "name": "container.mounts",
+    "type": "string",
+    "category": "container",
+    "description": "Container mounts",
+    "isDynamic": false
+  },
+  {
+    "name": "container.name",
+    "type": "string",
+    "category": "container",
+    "description": "Container name",
+    "isDynamic": false
+  },
+  {
+    "name": "container.privileged",
+    "type": "bool",
+    "category": "container",
+    "description": "Container is privileged",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.arg",
+    "type": "string",
+    "category": "evt",
+    "description": "Event argument by name",
+    "isDynamic": true
+  },
+  {
+    "name": "evt.args",
+    "type": "string",
+    "category": "evt",
+    "description": "All event arguments",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.buffer",
+    "type": "string",
+    "category": "evt",
+    "description": "Event buffer",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.buflen",
+    "type": "uint64",
+    "category": "evt",
+    "description": "Event buffer length",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.cpu",
+    "type": "uint32",
+    "category": "evt",
+    "description": "CPU number",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.dir",
+    "type": "string",
+    "category": "evt",
+    "description": "Event direction",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.hostname",
+    "type": "string",
+    "category": "evt",
+    "description": "Hostname",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.is_open_exec",
+    "type": "bool",
+    "category": "evt",
+    "description": "Open for exec",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.is_open_read",
+    "type": "bool",
+    "category": "evt",
+    "description": "Open for read",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.is_open_write",
+    "type": "bool",
+    "category": "evt",
+    "description": "Open for write",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.num",
+    "type": "uint64",
+    "category": "evt",
+    "description": "Event number",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.rawres",
+    "type": "int64",
+    "category": "evt",
+    "description": "Event return value (raw)",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.res",
+    "type": "string",
+    "category": "evt",
+    "description": "Event return value",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.time",
+    "type": "abstime",
+    "category": "evt",
+    "description": "Event timestamp",
+    "isDynamic": false
+  },
+  {
+    "name": "evt.type",
+    "type": "string",
+    "category": "evt",
+    "description": "Event type",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.cip",
+    "type": "ipaddr",
+    "category": "fd",
+    "description": "Client IP address",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.cip.name",
+    "type": "string",
+    "category": "fd",
+    "description": "Client IP name",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.cnet",
+    "type": "ipnet",
+    "category": "fd",
+    "description": "Client network",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.connected",
+    "type": "bool",
+    "category": "fd",
+    "description": "FD is connected",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.cport",
+    "type": "port",
+    "category": "fd",
+    "description": "Client port",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.dev",
+    "type": "uint32",
+    "category": "fd",
+    "description": "Device number",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.directory",
+    "type": "string",
+    "category": "fd",
+    "description": "Directory containing the file",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.filename",
+    "type": "string",
+    "category": "fd",
+    "description": "File name without path",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.ino",
+    "type": "uint64",
+    "category": "fd",
+    "description": "Inode number",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.ip",
+    "type": "ipaddr",
+    "category": "fd",
+    "description": "Remote IP address",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.l4proto",
+    "type": "string",
+    "category": "fd",
+    "description": "Layer 4 protocol",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.name",
+    "type": "string",
+    "category": "fd",
+    "description": "File descriptor name/path",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.name_changed",
+    "type": "bool",
+    "category": "fd",
+    "description": "FD name changed",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.nameraw",
+    "type": "string",
+    "category": "fd",
+    "description": "File descriptor name (raw)",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.net",
+    "type": "ipnet",
+    "category": "fd",
+    "description": "Network",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.num",
+    "type": "int64",
+    "category": "fd",
+    "description": "File descriptor number",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.port",
+    "type": "port",
+    "category": "fd",
+    "description": "Remote port",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.rnet",
+    "type": "string",
+    "category": "fd",
+    "description": "Remote network",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.sip",
+    "type": "ipaddr",
+    "category": "fd",
+    "description": "Server IP address",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.sip.name",
+    "type": "string",
+    "category": "fd",
+    "description": "Server IP name",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.snet",
+    "type": "ipnet",
+    "category": "fd",
+    "description": "Server network",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.sockfamily",
+    "type": "string",
+    "category": "fd",
+    "description": "Socket family (e.g., ip, unix)",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.sport",
+    "type": "port",
+    "category": "fd",
+    "description": "Server port",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.type",
+    "type": "string",
+    "category": "fd",
+    "description": "File descriptor type",
+    "isDynamic": false
+  },
+  {
+    "name": "fd.typechar",
+    "type": "string",
+    "category": "fd",
+    "description": "File descriptor type character",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.name",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path name",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.nameraw",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path name (raw)",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.source",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path source",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.sourceraw",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path source (raw)",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.target",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path target",
+    "isDynamic": false
+  },
+  {
+    "name": "fs.path.targetraw",
+    "type": "string",
+    "category": "fs",
+    "description": "File system path target (raw)",
+    "isDynamic": false
+  },
+  {
+    "name": "group.gid",
+    "type": "uint32",
+    "category": "group",
+    "description": "Group ID",
+    "isDynamic": false
+  },
+  {
+    "name": "group.name",
+    "type": "string",
+    "category": "group",
+    "description": "Group name",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.deployment.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes deployment name",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.ns.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes namespace",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.pod.cni.json",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes pod CNI JSON",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.pod.id",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes pod ID",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.pod.ip",
+    "type": "ipaddr",
+    "category": "k8s",
+    "description": "Kubernetes pod IP",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.pod.label",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes pod label",
+    "isDynamic": true
+  },
+  {
+    "name": "k8s.pod.labels",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes pod labels",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.pod.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes pod name",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.rc.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes replication controller name",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.rs.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes replica set name",
+    "isDynamic": false
+  },
+  {
+    "name": "k8s.svc.name",
+    "type": "string",
+    "category": "k8s",
+    "description": "Kubernetes service name",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.aexe",
+    "type": "string",
+    "category": "proc",
+    "description": "Ancestor process executable",
+    "isDynamic": true
+  },
+  {
+    "name": "proc.aname",
+    "type": "string",
+    "category": "proc",
+    "description": "Ancestor process name",
+    "isDynamic": true
+  },
+  {
+    "name": "proc.apid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Ancestor process ID",
+    "isDynamic": true
+  },
+  {
+    "name": "proc.args",
+    "type": "string",
+    "category": "proc",
+    "description": "Process arguments",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.cmdline",
+    "type": "string",
+    "category": "proc",
+    "description": "Process command line",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.cwd",
+    "type": "string",
+    "category": "proc",
+    "description": "Process current working directory",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.duration",
+    "type": "reltime",
+    "category": "proc",
+    "description": "Process duration",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.env",
+    "type": "string",
+    "category": "proc",
+    "description": "Process environment",
+    "isDynamic": true
+  },
+  {
+    "name": "proc.exe",
+    "type": "string",
+    "category": "proc",
+    "description": "Process executable path",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.exepath",
+    "type": "string",
+    "category": "proc",
+    "description": "Process executable path (resolved)",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.is_exe_from_memfd",
+    "type": "bool",
+    "category": "proc",
+    "description": "Executable from memfd",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.is_exe_upper_layer",
+    "type": "bool",
+    "category": "proc",
+    "description": "Executable from upper layer",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.is_vpgid_leader",
+    "type": "bool",
+    "category": "proc",
+    "description": "Virtual process group leader",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.name",
+    "type": "string",
+    "category": "proc",
+    "description": "Process name",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.pcmdline",
+    "type": "string",
+    "category": "proc",
+    "description": "Parent process command line",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.pexe",
+    "type": "string",
+    "category": "proc",
+    "description": "Parent process executable",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.pid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Process ID",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.pname",
+    "type": "string",
+    "category": "proc",
+    "description": "Parent process name",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.ppid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Parent process ID",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.pvpid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Parent virtual PID",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.sid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Session ID",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.sname",
+    "type": "string",
+    "category": "proc",
+    "description": "Session leader name",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.tty",
+    "type": "uint32",
+    "category": "proc",
+    "description": "Process TTY",
+    "isDynamic": false
+  },
+  {
+    "name": "proc.vpid",
+    "type": "int64",
+    "category": "proc",
+    "description": "Virtual PID",
+    "isDynamic": false
+  },
+  {
+    "name": "syscall.type",
+    "type": "string",
+    "category": "syscall",
+    "description": "Syscall type",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.cap_effective",
+    "type": "string",
+    "category": "thread",
+    "description": "Thread effective capabilities",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.cap_inheritable",
+    "type": "string",
+    "category": "thread",
+    "description": "Thread inheritable capabilities",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.cap_permitted",
+    "type": "string",
+    "category": "thread",
+    "description": "Thread permitted capabilities",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.cgroups",
+    "type": "string",
+    "category": "thread",
+    "description": "Thread cgroups",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.exectime",
+    "type": "reltime",
+    "category": "thread",
+    "description": "Thread execution time",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.ismain",
+    "type": "bool",
+    "category": "thread",
+    "description": "Is main thread",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.nametid",
+    "type": "string",
+    "category": "thread",
+    "description": "Thread name and TID",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.tid",
+    "type": "int64",
+    "category": "thread",
+    "description": "Thread ID",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.totexectime",
+    "type": "reltime",
+    "category": "thread",
+    "description": "Thread total execution time",
+    "isDynamic": false
+  },
+  {
+    "name": "thread.vtid",
+    "type": "int64",
+    "category": "thread",
+    "description": "Virtual thread ID",
+    "isDynamic": false
+  },
+  {
+    "name": "user.loginname",
+    "type": "string",
+    "category": "user",
+    "description": "Login user name",
+    "isDynamic": false
+  },
+  {
+    "name": "user.loginuid",
+    "type": "int64",
+    "category": "user",
+    "description": "Login UID",
+    "isDynamic": false
+  },
+  {
+    "name": "user.name",
+    "type": "string",
+    "category": "user",
+    "description": "User name",
+    "isDynamic": false
+  },
+  {
+    "name": "user.uid",
+    "type": "uint32",
+    "category": "user",
+    "description": "User ID",
+    "isDynamic": false
+  }
+]

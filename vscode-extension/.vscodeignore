@@ -1,0 +1,38 @@
+# VS Code Extension - Files to exclude from package
+
+# Source files (we bundle with esbuild)
+src/**
+tsconfig.json
+.eslintrc.json
+.prettierrc
+
+# Build tools
+esbuild.mjs
+.vscode-test.mjs
+
+# Development
+node_modules/**
+.vscode/**
+.vscode-test/**
+
+# Scripts (not needed in production)
+scripts/**
+
+# Documentation (keep README, CHANGELOG, LICENSE)
+*.md
+!README.md
+!CHANGELOG.md
+
+# Git
+.git/**
+.gitignore
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+
+# Misc
+.DS_Store
+*.log
+*.vsix
+

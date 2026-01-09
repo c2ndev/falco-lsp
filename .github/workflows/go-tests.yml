@@ -1,0 +1,100 @@
+name: Falco LSP CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "falco-lsp/**"
+      - ".github/workflows/go-tests.yml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "falco-lsp/**"
+      - ".github/workflows/go-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+          cache-dependency-path: falco-lsp/go.sum
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          working-directory: ./falco-lsp
+          args: --timeout=5m
+
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        go-version: ["1.21", "1.22"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+          cache-dependency-path: falco-lsp/go.sum
+
+      - name: Run tests
+        working-directory: ./falco-lsp
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.22'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./falco-lsp/coverage.out
+          flags: falco-lsp
+          fail_ci_if_error: false
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+          cache-dependency-path: falco-lsp/go.sum
+
+      - name: Download Falco rules
+        run: |
+          git clone --depth 1 https://github.com/falcosecurity/rules.git /tmp/falco-rules
+
+      - name: Build
+        working-directory: ./falco-lsp
+        run: make build
+
+      - name: Validate official Falco rules
+        working-directory: ./falco-lsp
+        run: |
+          ./build/falco-lang validate /tmp/falco-rules/rules/*.yaml

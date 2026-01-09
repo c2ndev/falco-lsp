@@ -1,0 +1,630 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Falco Rules YAML",
+  "scopeName": "source.falco-yaml",
+  "fileTypes": [
+    "yaml",
+    "yml"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#document-marker"
+    },
+    {
+      "include": "#directives"
+    },
+    {
+      "include": "#falco-rule-block"
+    },
+    {
+      "include": "#falco-macro-block"
+    },
+    {
+      "include": "#falco-list-block"
+    },
+    {
+      "include": "#falco-keys"
+    },
+    {
+      "include": "#falco-values"
+    },
+    {
+      "include": "#yaml-base"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.falco-yaml",
+          "match": "(#).*$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.falco-yaml"
+            }
+          }
+        }
+      ]
+    },
+    "document-marker": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.document.falco-yaml",
+          "match": "^(---|\\.\\.\\.)\\s*$"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "keyword.control.directive.yaml",
+          "match": "^(%YAML|%TAG)\\s+.*$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.directive.yaml"
+            }
+          }
+        }
+      ]
+    },
+    "falco-rule-block": {
+      "comment": "Falco rule definition block",
+      "begin": "^\\s*-?\\s*(rule)\\s*:",
+      "end": "^(?=\\s*-\\s*(rule|macro|list|required_engine_version|required_plugin_versions)\\s*:)|^(?=---)|^(?=\\.\\.\\.)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.rule.falco-yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#rule-properties"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#yaml-base"
+        }
+      ]
+    },
+    "falco-macro-block": {
+      "comment": "Falco macro definition block",
+      "begin": "^\\s*-?\\s*(macro)\\s*:",
+      "end": "^(?=\\s*-\\s*(rule|macro|list|required_engine_version|required_plugin_versions)\\s*:)|^(?=---)|^(?=\\.\\.\\.)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.macro.falco-yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#macro-properties"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#yaml-base"
+        }
+      ]
+    },
+    "falco-list-block": {
+      "comment": "Falco list definition block",
+      "begin": "^\\s*-?\\s*(list)\\s*:",
+      "end": "^(?=\\s*-\\s*(rule|macro|list|required_engine_version|required_plugin_versions)\\s*:)|^(?=---)|^(?=\\.\\.\\.)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.list.falco-yaml"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#list-properties"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#yaml-base"
+        }
+      ]
+    },
+    "rule-properties": {
+      "patterns": [
+        {
+          "comment": "Rule name property",
+          "match": "^\\s*(rule)\\s*(:)\\s*(.+)$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.rule.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            },
+            "3": {
+              "name": "entity.name.function.rule.falco-yaml"
+            }
+          }
+        },
+        {
+          "comment": "Condition property with inline highlighting",
+          "begin": "^\\s*(condition)\\s*(:)\\s*",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "support.type.property-name.condition.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#condition-expression"
+            }
+          ]
+        },
+        {
+          "comment": "Output property with placeholder highlighting",
+          "begin": "^\\s*(output)\\s*(:)\\s*",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "support.type.property-name.output.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#output-expression"
+            }
+          ]
+        },
+        {
+          "comment": "Priority property",
+          "match": "^\\s*(priority)\\s*(:)\\s*(EMERGENCY|ALERT|CRITICAL|ERROR|WARNING|NOTICE|INFORMATIONAL|INFO|DEBUG)?",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.priority.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            },
+            "3": {
+              "name": "constant.language.priority.falco-yaml"
+            }
+          }
+        },
+        {
+          "comment": "Source property",
+          "match": "^\\s*(source)\\s*(:)\\s*(syscall|k8s_audit|aws_cloudtrail|okta|github|gcp_auditlog|azure_platformlogs|plugin)?",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.source.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            },
+            "3": {
+              "name": "constant.language.source.falco-yaml"
+            }
+          }
+        },
+        {
+          "comment": "Other rule properties",
+          "match": "^\\s*(desc|tags|enabled|append|override|exceptions|warn_evttypes|skip-if-unknown-filter)\\s*(:)",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          }
+        }
+      ]
+    },
+    "macro-properties": {
+      "patterns": [
+        {
+          "comment": "Macro name property",
+          "match": "^\\s*(macro)\\s*(:)\\s*(.+)$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.macro.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            },
+            "3": {
+              "name": "entity.name.function.macro.falco-yaml"
+            }
+          }
+        },
+        {
+          "comment": "Condition property in macro",
+          "begin": "^\\s*(condition)\\s*(:)\\s*",
+          "end": "$",
+          "beginCaptures": {
+            "1": {
+              "name": "support.type.property-name.condition.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#condition-expression"
+            }
+          ]
+        },
+        {
+          "comment": "Other macro properties",
+          "match": "^\\s*(append)\\s*(:)",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          }
+        }
+      ]
+    },
+    "list-properties": {
+      "patterns": [
+        {
+          "comment": "List name property",
+          "match": "^\\s*(list)\\s*(:)\\s*(.+)$",
+          "captures": {
+            "1": {
+              "name": "keyword.control.list.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            },
+            "3": {
+              "name": "entity.name.type.list.falco-yaml"
+            }
+          }
+        },
+        {
+          "comment": "Items property",
+          "match": "^\\s*(items|append)\\s*(:)",
+          "captures": {
+            "1": {
+              "name": "support.type.property-name.falco-yaml"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.falco-yaml"
+            }
+          }
+        }
+      ]
+    },
+    "falco-keys": {
+      "patterns": [
+        {
+          "comment": "Top-level Falco definition types",
+          "name": "keyword.other.definition.falco-yaml",
+          "match": "^\\s*-?\\s*(rule|macro|list|required_engine_version|required_plugin_versions)(?=\\s*:)"
+        },
+        {
+          "comment": "Exception properties",
+          "name": "support.type.property-name.falco-yaml",
+          "match": "^\\s*(name|fields|comps|values)(?=\\s*:)"
+        }
+      ]
+    },
+    "condition-expression": {
+      "comment": "Falco condition expression syntax",
+      "patterns": [
+        {
+          "include": "#condition-parentheses"
+        },
+        {
+          "include": "#condition-operators"
+        },
+        {
+          "include": "#condition-fields"
+        },
+        {
+          "include": "#condition-macros"
+        },
+        {
+          "include": "#condition-lists"
+        },
+        {
+          "include": "#condition-strings"
+        },
+        {
+          "include": "#condition-numbers"
+        },
+        {
+          "include": "#comments"
+        }
+      ]
+    },
+    "condition-parentheses": {
+      "patterns": [
+        {
+          "name": "meta.brace.round.falco-yaml",
+          "match": "[()]"
+        }
+      ]
+    },
+    "condition-operators": {
+      "patterns": [
+        {
+          "comment": "Logical operators",
+          "name": "keyword.operator.logical.falco-yaml",
+          "match": "\\b(and|or|not)\\b"
+        },
+        {
+          "comment": "Comparison operators (word-based)",
+          "name": "keyword.operator.comparison.falco-yaml",
+          "match": "\\b(in|contains|icontains|startswith|istartswith|endswith|iendswith|glob|iglob|pmatch|bcontains|bstartswith|exists|intersects)\\b"
+        },
+        {
+          "comment": "Comparison operators (symbolic)",
+          "name": "keyword.operator.comparison.falco-yaml",
+          "match": "(==|!=|<=|>=|<|>|=)"
+        }
+      ]
+    },
+    "condition-fields": {
+      "patterns": [
+        {
+          "comment": "Syscall fields with array access",
+          "name": "variable.other.field.syscall.falco-yaml",
+          "match": "\\b(proc|fd|user|group|container|evt|syscall|thread|cgroup|syslog|span|evtin|plugininfo)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "K8s audit fields with array access",
+          "name": "variable.other.field.k8s-audit.falco-yaml",
+          "match": "\\b(ka|jevt|k8s)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "CloudTrail plugin fields",
+          "name": "variable.other.field.plugin.cloudtrail.falco-yaml",
+          "match": "\\b(ct)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "Okta plugin fields",
+          "name": "variable.other.field.plugin.okta.falco-yaml",
+          "match": "\\b(okta)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "GitHub plugin fields",
+          "name": "variable.other.field.plugin.github.falco-yaml",
+          "match": "\\b(github)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "GCP plugin fields",
+          "name": "variable.other.field.plugin.gcp.falco-yaml",
+          "match": "\\b(gcp)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        },
+        {
+          "comment": "Azure plugin fields",
+          "name": "variable.other.field.plugin.azure.falco-yaml",
+          "match": "\\b(azure)\\.[a-zA-Z_][a-zA-Z0-9_.]*(?:\\[[^\\]]*\\])?"
+        }
+      ]
+    },
+    "condition-macros": {
+      "patterns": [
+        {
+          "comment": "Macro references (identifiers that are not fields or operators)",
+          "name": "entity.name.function.macro.falco-yaml",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b(?!\\s*:)(?!\\.)(?!\\s*\\()"
+        }
+      ]
+    },
+    "condition-lists": {
+      "patterns": [
+        {
+          "comment": "List references in tuples",
+          "begin": "\\(",
+          "end": "\\)",
+          "patterns": [
+            {
+              "name": "entity.name.type.list.falco-yaml",
+              "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+            },
+            {
+              "include": "#condition-strings"
+            },
+            {
+              "name": "punctuation.separator.comma.falco-yaml",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+    "condition-strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.falco-yaml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.falco-yaml",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.falco-yaml",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.falco-yaml",
+              "match": "''"
+            }
+          ]
+        }
+      ]
+    },
+    "condition-numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.falco-yaml",
+          "match": "\\b[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?\\b"
+        }
+      ]
+    },
+    "output-expression": {
+      "comment": "Falco output format string",
+      "patterns": [
+        {
+          "comment": "Output field placeholders",
+          "name": "variable.other.placeholder.falco-yaml",
+          "match": "%[a-zA-Z_][a-zA-Z0-9_.\\[\\]]*"
+        },
+        {
+          "comment": "Escaped percent",
+          "name": "constant.character.escape.falco-yaml",
+          "match": "%%"
+        },
+        {
+          "include": "#yaml-base"
+        }
+      ]
+    },
+    "falco-values": {
+      "patterns": [
+        {
+          "comment": "Priority levels",
+          "name": "constant.language.priority.falco-yaml",
+          "match": "\\b(EMERGENCY|ALERT|CRITICAL|ERROR|WARNING|NOTICE|INFORMATIONAL|INFO|DEBUG)\\b"
+        },
+        {
+          "comment": "Source types",
+          "name": "constant.language.source.falco-yaml",
+          "match": "\\b(syscall|k8s_audit|aws_cloudtrail|okta|github|gcp_auditlog|azure_platformlogs|plugin)\\b"
+        },
+        {
+          "comment": "Boolean values",
+          "name": "constant.language.boolean.falco-yaml",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "yaml-base": {
+      "patterns": [
+        {
+          "comment": "Double quoted strings",
+          "name": "string.quoted.double.yaml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.yaml",
+              "match": "\\\\([\"\\\\/bfnrt]|u[0-9a-fA-F]{4})"
+            }
+          ]
+        },
+        {
+          "comment": "Single quoted strings",
+          "name": "string.quoted.single.yaml",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.yaml",
+              "match": "''"
+            }
+          ]
+        },
+        {
+          "comment": "Block scalar indicator",
+          "name": "keyword.control.flow.block-scalar.yaml",
+          "match": "([|>])([+-]?[0-9]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.flow.block-scalar.yaml"
+            },
+            "2": {
+              "name": "constant.numeric.indentation-indicator.yaml"
+            }
+          }
+        },
+        {
+          "comment": "Anchor definition",
+          "match": "(&)([a-zA-Z_][a-zA-Z0-9_-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.anchor.yaml"
+            },
+            "2": {
+              "name": "entity.name.type.anchor.yaml"
+            }
+          }
+        },
+        {
+          "comment": "Alias reference",
+          "match": "(\\*)([a-zA-Z_][a-zA-Z0-9_-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.alias.yaml"
+            },
+            "2": {
+              "name": "variable.other.alias.yaml"
+            }
+          }
+        },
+        {
+          "comment": "Tag",
+          "name": "storage.type.tag.yaml",
+          "match": "!(?:!|[a-zA-Z][a-zA-Z0-9_-]*)"
+        },
+        {
+          "comment": "Numbers (integer, float, scientific notation)",
+          "name": "constant.numeric.yaml",
+          "match": "\\b[-+]?(?:0x[0-9a-fA-F]+|0o[0-7]+|[0-9]+(?:\\.[0-9]+)?(?:[eE][-+]?[0-9]+)?)\\b"
+        },
+        {
+          "comment": "Null values",
+          "name": "constant.language.null.yaml",
+          "match": "\\b(null|Null|NULL|~)\\b"
+        },
+        {
+          "comment": "Boolean values",
+          "name": "constant.language.boolean.yaml",
+          "match": "\\b(true|True|TRUE|false|False|FALSE|yes|Yes|YES|no|No|NO|on|On|ON|off|Off|OFF)\\b"
+        },
+        {
+          "comment": "Key-value separator",
+          "name": "punctuation.separator.key-value.yaml",
+          "match": ":"
+        },
+        {
+          "comment": "List item indicator",
+          "name": "punctuation.definition.block.sequence.item.yaml",
+          "match": "^\\s*-(?=\\s|$)"
+        },
+        {
+          "comment": "Flow collection brackets and braces",
+          "name": "punctuation.definition.flow.yaml",
+          "match": "[\\[\\]{}]"
+        },
+        {
+          "comment": "Comma separator in flow collections",
+          "name": "punctuation.separator.comma.yaml",
+          "match": ","
+        }
+      ]
+    }
+  }
+}

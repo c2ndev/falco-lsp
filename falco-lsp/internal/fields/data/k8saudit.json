@@ -1,0 +1,541 @@
+[
+  {
+    "name": "jevt.obj",
+    "type": "string",
+    "category": "jevt",
+    "description": "Alias for json.obj, provided for backwards compatibility.",
+    "isDynamic": false
+  },
+  {
+    "name": "jevt.rawtime",
+    "type": "string",
+    "category": "jevt",
+    "description": "Alias for json.rawtime, provided for backwards compatibility.",
+    "isDynamic": false
+  },
+  {
+    "name": "jevt.value",
+    "type": "string",
+    "category": "jevt",
+    "description": "Alias for json.value, provided for backwards compatibility.",
+    "isDynamic": false
+  },
+  {
+    "name": "json.obj",
+    "type": "string",
+    "category": "json",
+    "description": "The full json message as a text string.",
+    "isDynamic": false
+  },
+  {
+    "name": "json.rawtime",
+    "type": "string",
+    "category": "json",
+    "description": "The time of the event, identical to evt.rawtime.",
+    "isDynamic": false
+  },
+  {
+    "name": "json.value",
+    "type": "string",
+    "category": "json",
+    "description": "Extracts a value from a JSON-encoded input. Syntax is json.value[<json pointer>], where <json pointer> is a json pointer (see https://datatracker.ietf.org/doc/html/rfc6901)",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.auditid",
+    "type": "string",
+    "category": "ka",
+    "description": "The unique id of the audit event",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.auth.decision",
+    "type": "string",
+    "category": "ka",
+    "description": "The authorization decision",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.auth.openshift.decision",
+    "type": "string",
+    "category": "ka",
+    "description": "The authentication decision of the openshfit apiserver extention. Only available on openshift clusters",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.auth.openshift.username",
+    "type": "string",
+    "category": "ka",
+    "description": "The user name performing the openshift authentication operation. Only available on openshift clusters",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.auth.reason",
+    "type": "string",
+    "category": "ka",
+    "description": "The authorization reason",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.cluster.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The name of the k8s cluster",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.impuser.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The impersonated user name",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.role",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the role being linked by the binding",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subject.has_name",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated, always returns \\",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subjects",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the subject (e.g. account/users) being linked by the binding",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subjects.group_names",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the subject group names being linked by the binding",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subjects.serviceaccount_names",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the subject service account names being linked by the binding",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subjects.serviceaccount_ns_names",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the subject serviceaccount namespaced names being linked by the binding, e.g. a list containing: mynamespace:myserviceaccount",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.binding.subjects.user_names",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a cluster role binding, the subject user names being linked by the binding",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.configmap.name",
+    "type": "string",
+    "category": "ka",
+    "description": "If the request object refers to a configmap, the configmap name",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.configmap.obj",
+    "type": "string",
+    "category": "ka",
+    "description": "If the request object refers to a configmap, the entire configmap object",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.container.host_network",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated alias for ka.req.pod.host_network",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.container.image",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated by ka.req.pod.containers.image. Returns the image of the first container only",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.container.image.repository",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated by ka.req.pod.containers.image.repository. Returns the repository of the first container only",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.container.privileged",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated by ka.req.pod.containers.privileged. Returns true if any container has privileged=true",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.add_capabilities",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, all capabilities to add when running the container.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.allow_privilege_escalation",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the allowPrivilegeEscalation flag for all containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.args",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the container's args.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.command",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the container's command.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.eff_run_as_group",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the initial gid that will be used for all containers. This combines information from both the pod and container security contexts and uses 0 if no gid is specified",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.eff_run_as_user",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the initial uid that will be used for all containers. This combines information from both the pod and container security contexts and uses 0 if no uid is specified",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.host_port",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, all container's hostPort values.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.image",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the container's images.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.image.repository",
+    "type": "string",
+    "category": "ka",
+    "description": "The same as req.container.image, but only the repository part (e.g. falcosecurity/falco).",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.name",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the container's names.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.privileged",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the privileged flag for all containers.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.proc_mount",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the procMount types for all containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.read_only_fs",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the readOnlyRootFilesystem flag for all containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.run_as_group",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the runAsGroup gid for all containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.containers.run_as_user",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the runAsUser uid for all containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.fs_group",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the fsGroup gid specified by the security context.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.host_ipc",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the hostIPC flag.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.host_network",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the hostNetwork flag.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.host_pid",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the value of the hostPID flag.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.run_as_group",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the runAsGroup gid specified in the security context for the pod. See ....containers.run_as_group for the runAsGroup for individual containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.run_as_user",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the runAsUser uid specified in the security context for the pod. See ....containers.run_as_user for the runAsUser for individual containers",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.supplemental_groups",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, the supplementalGroup gids specified by the security context.",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.volumes.flexvolume_driver",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, all flexvolume drivers specified for all volumes",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.volumes.hostpath",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, all hostPath paths specified for all volumes",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.pod.volumes.volume_type",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a pod, all volume types for all volumes",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.role.rules",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a role/cluster role, the rules associated with the role",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.role.rules.apiGroups",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a role/cluster role, the api groups associated with the role's rules",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.role.rules.nonResourceURLs",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a role/cluster role, the non resource urls associated with the role's rules",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.role.rules.resources",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a role/cluster role, the resources associated with the role's rules",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.role.rules.verbs",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a role/cluster role, the verbs associated with the role's rules",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.service.ports",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a service, the service's ports",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.service.type",
+    "type": "string",
+    "category": "ka",
+    "description": "When the request object refers to a service, the service type",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.req.volume.hostpath",
+    "type": "string",
+    "category": "ka",
+    "description": "Deprecated by ka.req.pod.volumes.hostpath. Return true if the provided (host) path prefix is used by any volume",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.resp.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The response object name",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.response.code",
+    "type": "string",
+    "category": "ka",
+    "description": "The response code",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.response.reason",
+    "type": "string",
+    "category": "ka",
+    "description": "The response reason (usually present only for failures)",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.security.pod.violations",
+    "type": "string",
+    "category": "ka",
+    "description": "The violation reason for pod security policy ",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.sourceips",
+    "type": "string",
+    "category": "ka",
+    "description": "The IP addresses of the client who made the request to the apiserver",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.stage",
+    "type": "string",
+    "category": "ka",
+    "description": "Stage of the request (e.g. RequestReceived, ResponseComplete, etc.)",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.target.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The target object name",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.target.namespace",
+    "type": "string",
+    "category": "ka",
+    "description": "The target object namespace",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.target.pod.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The target pod name",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.target.resource",
+    "type": "string",
+    "category": "ka",
+    "description": "The target object resource",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.target.subresource",
+    "type": "string",
+    "category": "ka",
+    "description": "The target object subresource",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.uri",
+    "type": "string",
+    "category": "ka",
+    "description": "The request URI as sent from client to server",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.uri.param",
+    "type": "string",
+    "category": "ka",
+    "description": "The value of a given query parameter in the uri (e.g. when uri=/foo?key=val, ka.uri.param[key] is val).",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.user.groups",
+    "type": "string",
+    "category": "ka",
+    "description": "The groups to which the user belongs",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.user.name",
+    "type": "string",
+    "category": "ka",
+    "description": "The user name performing the request",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.useragent",
+    "type": "string",
+    "category": "ka",
+    "description": "The useragent of the client who made the request to the apiserver",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.validations.admission.policy.failure",
+    "type": "string",
+    "category": "ka",
+    "description": "The validation failure reason from a Validation Admission Policy",
+    "isDynamic": false
+  },
+  {
+    "name": "ka.verb",
+    "type": "string",
+    "category": "ka",
+    "description": "The action being performed",
+    "isDynamic": false
+  }
+]

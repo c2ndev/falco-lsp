@@ -1,0 +1,30 @@
+- required_engine_version: 0.30.0
+
+- required_plugin_versions:
+  - name: 
+    version: 0.10.0
+
+- list: test_list
+  items: ["item1", "item2", "item3"]
+
+- macro: test_macro
+  condition: evt.cpu > 4
+
+- macro: test
+  condition: container.full_id != ""
+
+- rule: Test
+  desc: 
+  condition: ct.addendum.reason == "TestReason" and container.full_id != ""
+  output: ""
+  priority: INFO
+  source: aws_cloudtrail
+  tags: []
+
+- rule: Test 2
+  desc: Test rule 2 description
+  condition: test != ""
+  output: "Test output with %test.field"
+  priority: ERROR
+  source: github
+  tags: [compliance, container]

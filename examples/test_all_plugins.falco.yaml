@@ -1,0 +1,164 @@
+# ============================================================================
+# TEST SYSCALL FIELDS (source: syscall)
+# ============================================================================
+- rule: Test Syscall Fields
+  desc: Test basic syscall fields
+  condition: >
+    evt.type = execve and
+    proc.name = "bash" and
+    fd.name contains "/tmp" and
+    user.name = "root"
+  output: "Syscall event (proc=%proc.name user=%user.name)"
+  priority: WARNING
+  source: syscall
+
+# ============================================================================
+# TEST CONTAINER PLUGIN (source: syscall)
+# ============================================================================
+- rule: Test Container Basic Fields
+  desc: Test container.* basic fields
+  condition: >
+    container.id != "" and
+    container.name = "test-container" and
+    container.image contains "nginx" and
+    container.image.repository = "docker.io/nginx" and
+    container.image.tag = "latest" and
+    container.privileged = true
+  output: "Container (name=%container.name image=%container.image)"
+  priority: WARNING
+  source: syscall
+
+- rule: Test Container Network Fields
+  desc: Test container network fields
+  condition: >
+    container.ip = "10.0.0.1" and
+    container.cni.json contains "bridge"
+  output: "Container network (ip=%container.ip)"
+  priority: INFO
+  source: syscall
+
+- rule: Test Container Dynamic Fields
+  desc: Test container dynamic fields with []
+  condition: >
+    container.label[app] = "web" and
+    container.mount[0] contains "/data" and
+    container.mount.source[0] = "/host/data"
+  output: "Container labels and mounts"
+  priority: INFO
+  source: syscall
+
+# ============================================================================
+# TEST K8S FIELDS FROM CONTAINER PLUGIN (source: syscall)
+# ============================================================================
+- rule: Test K8s Fields from Container Plugin
+  desc: Test k8s.* fields provided by container plugin
+  condition: >
+    k8s.pod.name = "my-pod" and
+    k8s.ns.name = "default" and
+    k8s.pod.ip = "10.244.0.1" and
+    k8s.deployment.name = "my-deployment"
+  output: "K8s (pod=%k8s.pod.name ns=%k8s.ns.name)"
+  priority: INFO
+  source: syscall
+
+- rule: Test K8s Dynamic Fields
+  desc: Test k8s dynamic fields with []
+  condition: >
+    k8s.pod.label[app] = "web" and
+    k8s.pod.label[version] = "v1"
+  output: "K8s labels"
+  priority: INFO
+  source: syscall
+
+# ============================================================================
+# TEST K8SMETA PLUGIN (source: syscall)
+# ============================================================================
+- rule: Test K8sMeta Fields
+  desc: Test k8smeta.* fields
+  condition: >
+    k8smeta.pod.name = "test-pod" and
+    k8smeta.pod.uid != "" and
+    k8smeta.deployment.name = "my-deployment" and
+    k8smeta.ns.name = "production"
+  output: "K8s meta (pod=%k8smeta.pod.name deployment=%k8smeta.deployment.name)"
+  priority: INFO
+  source: syscall
+
+# ============================================================================
+# TEST K8SAUDIT PLUGIN (source: k8s_audit)
+# ============================================================================
+- rule: Test K8sAudit Fields
+  desc: Test k8saudit.* fields
+  condition: >
+    ka.verb = "create" and
+    ka.target.name = "my-pod" and
+    ka.target.namespace = "default" and
+    ka.user.name = "admin"
+  output: "K8s audit (verb=%ka.verb target=%ka.target.name user=%ka.user.name)"
+  priority: WARNING
+  source: k8s_audit
+
+# ============================================================================
+# TEST JSON PLUGIN (source: json)
+# ============================================================================
+- rule: Test Json Fields
+  desc: Test jevt.* fields
+  condition: >
+    jevt.value[/user/name] = "admin" and
+    jevt.rawtime != ""
+  output: "JSON event"
+  priority: INFO
+  source: json
+
+# ============================================================================
+# TEST CLOUDTRAIL PLUGIN (source: aws_cloudtrail)
+# ============================================================================
+- rule: Test CloudTrail Fields
+  desc: Test ct.* fields
+  condition: >
+    ct.name = "CreateBucket" and
+    ct.user = "admin" and
+    ct.region = "us-east-1" and
+    ct.error contains "AccessDenied"
+  output: "CloudTrail (event=%ct.name user=%ct.user region=%ct.region)"
+  priority: WARNING
+  source: aws_cloudtrail
+
+# ============================================================================
+# TEST OKTA PLUGIN (source: okta)
+# ============================================================================
+- rule: Test Okta Fields
+  desc: Test okta.* fields
+  condition: >
+    okta.evt.type = "user.session.start" and
+    okta.actor.name = "user@example.com" and
+    okta.result = "SUCCESS"
+  output: "Okta (event=%okta.evt.type actor=%okta.actor.name)"
+  priority: INFO
+  source: okta
+
+# ============================================================================
+# TEST GITHUB PLUGIN (source: github)
+# ============================================================================
+- rule: Test GitHub Fields
+  desc: Test github.* fields
+  condition: >
+    github.action = "push" and
+    github.repo = "myorg/myrepo" and
+    github.user = "developer"
+  output: "GitHub (action=%github.action repo=%github.repo user=%github.user)"
+  priority: INFO
+  source: github
+
+# ============================================================================
+# TEST GCPAUDIT PLUGIN (source: gcp_auditlog)
+# ============================================================================
+- rule: Test GCP Audit Fields
+  desc: Test gcp.* fields
+  condition: >
+    gcp.methodName = "storage.buckets.create" and
+    gcp.user = "user@example.com" and
+    gcp.serviceName = "storage.googleapis.com"
+  output: "GCP Audit (method=%gcp.methodName user=%gcp.user)"
+  priority: WARNING
+  source: gcp_auditlog

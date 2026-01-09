@@ -1,0 +1,295 @@
+{
+  "name": "falco-rules",
+  "displayName": "Falco Rules",
+  "description": "Full language support for Falco Security Rules with syntax highlighting, code completion, validation, and more",
+  "version": "0.1.0",
+  "publisher": "c2ndev",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c2ndev/falco-lsp"
+  },
+  "bugs": {
+    "url": "https://github.com/c2ndev/falco-lsp/issues"
+  },
+  "homepage": "https://falco.org",
+  "icon": "icons/falco.png",
+  "galleryBanner": {
+    "color": "#00B4A0",
+    "theme": "dark"
+  },
+  "keywords": [
+    "falco",
+    "security",
+    "kubernetes",
+    "cloud-native",
+    "runtime-security",
+    "rules"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters",
+    "Snippets"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "workspaceContains:**/*.falco.yaml",
+    "workspaceContains:**/*.falco.yml"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "falco-yaml",
+        "aliases": [
+          "Falco Rules",
+          "falco-yaml"
+        ],
+        "extensions": [
+          ".falco.yaml",
+          ".falco.yml"
+        ],
+        "configuration": "./language-configuration-yaml.json",
+        "icon": {
+          "light": "./icons/falco-light.svg",
+          "dark": "./icons/falco-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "falco-yaml",
+        "scopeName": "source.falco-yaml",
+        "path": "./syntaxes/falco-yaml.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "Falco Rules",
+      "properties": {
+        "falco.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "minimum": 1,
+          "description": "Maximum number of problems reported per document"
+        },
+        "falco.enableFormatting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic code formatting"
+        },
+        "falco.tabSize": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Tab size for formatting"
+        },
+        "falco.insertSpaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use spaces for indentation"
+        },
+        "falco.alignProperties": {
+          "type": "boolean",
+          "default": true,
+          "description": "Align properties in rule/macro/list definitions"
+        },
+        "falco.enableSemanticHighlighting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable semantic syntax highlighting"
+        },
+        "falco.validateYamlFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate Falco rules in YAML files"
+        },
+        "falco.highlightMacrosInConditions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight macro and list references in condition expressions"
+        },
+        "falco.schemaValidation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable JSON Schema validation for Falco YAML files"
+        },
+        "falco.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace communication between VS Code and the Falco language server"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "falco.validate",
+        "title": "Falco: Validate Current File"
+      },
+      {
+        "command": "falco.validateWorkspace",
+        "title": "Falco: Validate All Files in Workspace"
+      },
+      {
+        "command": "falco.formatDocument",
+        "title": "Falco: Format Document"
+      },
+      {
+        "command": "falco.showOutput",
+        "title": "Falco: Show Output Channel"
+      },
+      {
+        "command": "falco.restartServer",
+        "title": "Falco: Restart Language Server"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "*.falco.yaml",
+          "*.falco.yml"
+        ],
+        "url": "./schemas/falco-rules.schema.json"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "falco.validate",
+          "when": "resourceLangId == falco-yaml",
+          "group": "falco"
+        },
+        {
+          "command": "falco.formatDocument",
+          "when": "resourceLangId == falco-yaml",
+          "group": "falco"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "falco.validate",
+          "when": "resourceLangId == falco-yaml"
+        },
+        {
+          "command": "falco.validateWorkspace"
+        },
+        {
+          "command": "falco.formatDocument",
+          "when": "resourceLangId == falco-yaml"
+        },
+        {
+          "command": "falco.showOutput"
+        },
+        {
+          "command": "falco.restartServer"
+        }
+      ]
+    },
+    "snippets": [
+      {
+        "language": "falco-yaml",
+        "path": "./snippets/falco-yaml.json"
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "falco",
+        "owner": "falco",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+):\\s+(error|warning|info):\\s+(.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "falco",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The falco-lang command to run",
+            "enum": [
+              "validate",
+              "format",
+              "check"
+            ]
+          },
+          "files": {
+            "type": "array",
+            "description": "Files or patterns to process",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "macro",
+        "superType": "function",
+        "description": "A Falco macro definition"
+      }
+    ],
+    "semanticTokenModifiers": [],
+    "semanticTokenScopes": [
+      {
+        "scopes": {
+          "macro": [
+            "entity.name.function.macro.falco"
+          ]
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --production",
+    "esbuild-base": "node esbuild.mjs",
+    "build": "npm run esbuild-base",
+    "watch": "node esbuild.mjs --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies",
+    "test": "vscode-test",
+    "sync-schema": "node scripts/sync-falco-schema.mjs",
+    "sync-fields": "node scripts/sync-fields-go.mjs"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  }
+}

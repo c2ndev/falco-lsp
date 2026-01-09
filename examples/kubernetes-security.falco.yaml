@@ -1,0 +1,308 @@
+# Kubernetes Security Rules for Falco
+# Official YAML format - compatible with Falco engine
+#
+# Rules for monitoring Kubernetes cluster security,
+# covering API audit events and runtime detection.
+
+# ===========================================================================
+# REQUIRED ENGINE VERSION
+# ===========================================================================
+- required_engine_version: 0.31.0
+
+# ===========================================================================
+# LISTS
+# ===========================================================================
+
+# Kubernetes system namespaces
+- list: k8s_system_namespaces
+  items:
+    - kube-system
+    - kube-public
+    - kube-node-lease
+    - default
+
+# Sensitive Kubernetes resources
+- list: k8s_sensitive_resources
+  items:
+    - secrets
+    - configmaps
+    - serviceaccounts
+    - clusterroles
+    - clusterrolebindings
+    - roles
+    - rolebindings
+    - pods/exec
+    - pods/attach
+    - pods/portforward
+
+# Kubernetes admin operations
+- list: k8s_admin_verbs
+  items:
+    - create
+    - update
+    - patch
+    - delete
+    - deletecollection
+
+# Trusted service accounts for cluster operations
+- list: trusted_service_accounts
+  items:
+    - system:serviceaccount:kube-system:default
+    - system:serviceaccount:kube-system:kube-proxy
+    - system:serviceaccount:kube-system:coredns
+
+# Suspicious container image patterns
+- list: suspicious_image_patterns
+  items:
+    - latest
+    - debug
+    - test
+    - dev
+
+# ===========================================================================
+# MACROS
+# ===========================================================================
+
+# Check if in Kubernetes environment
+- macro: in_kubernetes
+  condition: k8s.pod.name != ""
+
+# Check if in system namespace
+- macro: in_system_namespace
+  condition: k8s.ns.name in (k8s_system_namespaces)
+
+# Check if in user (non-system) namespace
+- macro: in_user_namespace
+  condition: k8s.ns.name != "" and not in_system_namespace
+
+# Check if using default service account
+# Note: k8s.pod.sa does not exist in Falco. Use k8s.pod.label instead
+- macro: using_default_sa
+  condition: k8s.pod.label[io.kubernetes.pod.service-account.name] = "default"
+
+# Check if modifying sensitive resources
+- macro: modifying_sensitive_resource
+  condition: ka.target.resource in (k8s_sensitive_resources) and ka.verb in (k8s_admin_verbs)
+
+# Check if exec into pod
+- macro: pod_exec
+  condition: ka.target.subresource = "exec" and ka.verb = "create"
+
+# Check if attaching to pod
+- macro: pod_attach
+  condition: ka.target.subresource = "attach" and ka.verb = "create"
+
+# Check if port forwarding
+- macro: pod_portforward
+  condition: ka.target.subresource = "portforward" and ka.verb = "create"
+
+# Check if request from within cluster
+- macro: request_from_cluster
+  condition: ka.sourceips != ""
+
+# Check if anonymous request
+- macro: anonymous_request
+  condition: ka.user.name = "system:anonymous"
+
+# ===========================================================================
+# RULES - K8s Audit Rules
+# ===========================================================================
+
+# Detect anonymous API access
+- rule: K8s Anonymous Access
+  desc: Anonymous access to Kubernetes API
+  condition: anonymous_request and ka.verb in (get, list, watch, create, update, delete)
+  output: "Anonymous K8s API access (verb=%ka.verb resource=%ka.target.resource uri=%ka.uri)"
+  priority: WARNING
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - api
+    - anonymous
+    - mitre_initial_access
+
+# Detect secret access
+- rule: K8s Secret Access Audit
+  desc: Access to Kubernetes secrets via API
+  condition: ka.target.resource = "secrets" and ka.verb in (get, list) and not in_system_namespace
+  output: "K8s secret access (user=%ka.user.name ns=%ka.target.namespace secret=%ka.target.name)"
+  priority: NOTICE
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - secrets
+    - mitre_credential_access
+
+# Detect secret modification
+- rule: K8s Secret Modified
+  desc: Kubernetes secret was created or modified
+  condition: ka.target.resource = "secrets" and ka.verb in (k8s_admin_verbs)
+  output: "K8s secret modified (user=%ka.user.name verb=%ka.verb ns=%ka.target.namespace secret=%ka.target.name)"
+  priority: WARNING
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - secrets
+    - mitre_persistence
+
+# Detect exec into pod
+- rule: K8s Pod Exec
+  desc: Exec command issued to a pod
+  condition: pod_exec
+  output: "Pod exec (user=%ka.user.name pod=%ka.target.name ns=%ka.target.namespace command=%ka.requestObject.command)"
+  priority: NOTICE
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - exec
+    - mitre_execution
+
+# Detect attach to pod
+- rule: K8s Pod Attach
+  desc: Attach command issued to a pod
+  condition: pod_attach
+  output: "Pod attach (user=%ka.user.name pod=%ka.target.name ns=%ka.target.namespace)"
+  priority: NOTICE
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - attach
+    - mitre_execution
+
+# Detect port forwarding
+- rule: K8s Pod Portforward
+  desc: Port forward initiated to a pod
+  condition: pod_portforward
+  output: "Pod port forward (user=%ka.user.name pod=%ka.target.name ns=%ka.target.namespace ports=%ka.requestObject.ports)"
+  priority: NOTICE
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - network
+    - mitre_lateral_movement
+
+# Detect RBAC changes
+- rule: K8s RBAC Modified
+  desc: RBAC configuration was modified
+  condition: >
+    ka.target.resource in (clusterroles, clusterrolebindings, roles, rolebindings)
+    and ka.verb in (k8s_admin_verbs)
+  output: "RBAC modified (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource name=%ka.target.name)"
+  priority: WARNING
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - rbac
+    - mitre_privilege_escalation
+
+# Detect service account token creation
+- rule: K8s SA Token Created
+  desc: Service account token was created
+  condition: ka.target.resource = "serviceaccounts" and ka.target.subresource = "token" and ka.verb = "create"
+  output: "SA token created (user=%ka.user.name sa=%ka.target.name ns=%ka.target.namespace)"
+  priority: WARNING
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - serviceaccount
+    - mitre_credential_access
+
+# Detect privileged pod creation
+- rule: K8s Privileged Pod
+  desc: Privileged pod was created
+  condition: >
+    ka.target.resource = "pods"
+    and ka.verb = "create"
+    and jevt.value[/spec/containers/0/securityContext/privileged] = "true"
+  output: "Privileged pod created (user=%ka.user.name pod=%ka.target.name ns=%ka.target.namespace)"
+  priority: ALERT
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - privileged
+    - mitre_privilege_escalation
+
+# Detect hostPath mount
+- rule: K8s HostPath Mount
+  desc: Pod with hostPath mount was created
+  condition: >
+    ka.target.resource = "pods"
+    and ka.verb = "create"
+    and jevt.value[/spec/volumes/0/hostPath/path] exists
+  output: "HostPath pod created (user=%ka.user.name pod=%ka.target.name ns=%ka.target.namespace)"
+  priority: WARNING
+  source: k8s_audit
+  tags:
+    - kubernetes
+    - volume
+    - mitre_persistence
+
+# ===========================================================================
+# RULES - K8s Runtime Rules (syscall source)
+# ===========================================================================
+
+# Detect suspicious binary in K8s pod
+- rule: K8s Suspicious Binary
+  desc: Suspicious binary executed in Kubernetes pod
+  condition: >
+    in_kubernetes
+    and evt.type = execve
+    and proc.name in (nc, ncat, netcat, nmap, curl, wget)
+    and in_user_namespace
+  output: "Suspicious binary in pod (pod=%k8s.pod.name ns=%k8s.ns.name proc=%proc.name cmdline=%proc.cmdline)"
+  priority: WARNING
+  source: syscall
+  tags:
+    - kubernetes
+    - suspicious
+    - mitre_execution
+
+# Detect crypto miner indicators
+- rule: K8s Crypto Miner
+  desc: Potential crypto miner in Kubernetes pod
+  condition: >
+    in_kubernetes
+    and evt.type = execve
+    and (proc.name contains "miner"
+         or proc.cmdline contains "stratum"
+         or proc.cmdline contains "cryptonight"
+         or proc.cmdline contains "monero")
+  output: "Potential crypto miner (pod=%k8s.pod.name ns=%k8s.ns.name cmdline=%proc.cmdline)"
+  priority: CRITICAL
+  source: syscall
+  tags:
+    - kubernetes
+    - cryptominer
+    - mitre_impact
+
+# Detect pod using default service account
+- rule: K8s Default SA Usage
+  desc: Pod running with default service account accessing secrets
+  condition: >
+    in_kubernetes
+    and using_default_sa
+    and fd.name startswith "/var/run/secrets/kubernetes.io"
+    and evt.type in (open, openat)
+  output: "Default SA secret access (pod=%k8s.pod.name ns=%k8s.ns.name file=%fd.name)"
+  priority: NOTICE
+  source: syscall
+  tags:
+    - kubernetes
+    - serviceaccount
+    - mitre_credential_access
+
+# Detect network connection from pod to suspicious port
+- rule: K8s Suspicious Outbound
+  desc: Pod making connection to suspicious port
+  condition: >
+    in_kubernetes
+    and evt.type = connect
+    and fd.sport in (6379, 27017, 3306, 5432, 1433, 11211)
+    and not in_system_namespace
+  output: "Suspicious outbound connection from pod (pod=%k8s.pod.name ns=%k8s.ns.name ip=%fd.sip port=%fd.sport)"
+  priority: WARNING
+  source: syscall
+  tags:
+    - kubernetes
+    - network
+    - mitre_lateral_movement

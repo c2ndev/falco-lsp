@@ -1,0 +1,114 @@
+# GCP Audit Log Security Rules
+# Plugin: gcpaudit
+# Source: gcp_auditlog
+
+- list: gcp_sensitive_permissions
+  items:
+    - iam.serviceAccountKeys.create
+    - iam.serviceAccounts.setIamPolicy
+    - compute.firewalls.delete
+    - storage.buckets.setIamPolicy
+    - compute.instances.setMetadata
+
+- list: gcp_data_services
+  items:
+    - bigquery
+    - storage
+    - cloudsql
+
+- macro: gcp_successful_operation
+  condition: gcp.methodName != ""
+
+# Detect Service Account Key Creation
+- rule: GCP Service Account Key Created
+  desc: Detect when new service account keys are created
+  condition: >
+    gcp.methodName = "google.iam.admin.v1.CreateServiceAccountKey" and
+    gcp_successful_operation
+  output: >
+    Service account key created 
+    (project=%gcp.projectId caller=%gcp.user ip=%gcp.callerIP)
+  priority: WARNING
+  source: gcp_auditlog
+  tags: [gcp, iam, service-account]
+
+# Detect Firewall Rule Deleted
+- rule: GCP Firewall Rule Deleted
+  desc: Detect when firewall rules are deleted
+  condition: >
+    gcp.methodName contains "compute.firewalls.delete" and
+    gcp_successful_operation
+  output: >
+    GCP firewall rule deleted 
+    (project=%gcp.projectId caller=%gcp.user network=%gcp.compute.networkId)
+  priority: WARNING
+  source: gcp_auditlog
+  tags: [gcp, firewall, network]
+
+# Detect Public Bucket
+- rule: GCP Storage Bucket Made Public
+  desc: Detect when a Cloud Storage bucket is made publicly accessible
+  condition: >
+    gcp.methodName = "storage.setIamPermissions" and
+    gcp_successful_operation and
+    gcp.authorizationInfo contains "allUsers"
+  output: >
+    GCS bucket made public 
+    (project=%gcp.projectId bucket=%gcp.storage.bucket caller=%gcp.user)
+  priority: CRITICAL
+  source: gcp_auditlog
+  tags: [gcp, storage, public-access]
+
+# Detect VM Instance Created with External IP
+- rule: GCP VM Created with External IP
+  desc: Detect when a VM instance is created with an external IP address
+  condition: >
+    gcp.methodName = "v1.compute.instances.insert" and
+    gcp_successful_operation
+  output: >
+    GCE instance created 
+    (project=%gcp.projectId instance=%gcp.compute.instanceId caller=%gcp.user)
+  priority: NOTICE
+  source: gcp_auditlog
+  tags: [gcp, compute, vm]
+
+# Detect Cloud SQL Instance Modified
+- rule: GCP Cloud SQL Instance Modified
+  desc: Detect modifications to Cloud SQL instances
+  condition: >
+    gcp.methodName contains "cloudsql" and
+    gcp.methodName contains "update" and
+    gcp_successful_operation
+  output: >
+    Cloud SQL instance modified 
+    (project=%gcp.projectId database=%gcp.cloudsql.databaseId caller=%gcp.user)
+  priority: NOTICE
+  source: gcp_auditlog
+  tags: [gcp, cloudsql, database]
+
+# Detect IAM Policy Change
+- rule: GCP IAM Policy Changed
+  desc: Detect when IAM policies are modified
+  condition: >
+    gcp.methodName contains "SetIamPolicy" and
+    gcp_successful_operation
+  output: >
+    GCP IAM policy modified 
+    (project=%gcp.projectId caller=%gcp.user ip=%gcp.callerIP)
+  priority: WARNING
+  source: gcp_auditlog
+  tags: [gcp, iam, policy]
+
+# Detect Cloud Function Deployment
+- rule: GCP Cloud Function Deployed
+  desc: Detect when Cloud Functions are deployed
+  condition: >
+    gcp.methodName contains "cloudfunctions" and
+    gcp.methodName contains "create" and
+    gcp_successful_operation
+  output: >
+    Cloud Function deployed 
+    (project=%gcp.projectId function=%gcp.cloudfunctions.function caller=%gcp.user)
+  priority: NOTICE
+  source: gcp_auditlog
+  tags: [gcp, cloudfunctions, serverless]

@@ -1,0 +1,109 @@
+# GitHub Audit Security Rules
+# Plugin: github
+# Source: github
+
+- list: github_sensitive_actions
+  items:
+    - created
+    - deleted
+    - removed
+
+- list: github_repo_settings
+  items:
+    - repository
+    - protected_branch
+    - repository_vulnerability_alert
+
+- macro: github_org_event
+  condition: github.org != ""
+
+# Detect Repository Made Public
+- rule: GitHub Repository Made Public
+  desc: Detect when a private repository is made public
+  condition: >
+    github.type = "repository" and
+    github.action = "publicized"
+  output: >
+    GitHub repository made public 
+    (repo=%github.repo org=%github.org actor=%github.user)
+  priority: CRITICAL
+  source: github
+  tags: [github, repository, public-access]
+
+# Detect Branch Protection Disabled
+- rule: GitHub Branch Protection Disabled
+  desc: Detect when branch protection rules are disabled
+  condition: >
+    github.type = "protected_branch" and
+    github.action = "deleted"
+  output: >
+    Branch protection disabled 
+    (repo=%github.repo branch=%github.ref actor=%github.user)
+  priority: WARNING
+  source: github
+  tags: [github, branch, security]
+
+# Detect Organization Member Added
+- rule: GitHub Organization Member Added
+  desc: Detect when new members are added to an organization
+  condition: >
+    github.type = "org" and
+    github.action = "member_added"
+  output: >
+    New member added to GitHub organization 
+    (org=%github.org new_member=%github.target.user actor=%github.user)
+  priority: NOTICE
+  source: github
+  tags: [github, organization, membership]
+
+# Detect Collaborator Added
+- rule: GitHub Collaborator Added
+  desc: Detect when collaborators are added to a repository
+  condition: >
+    github.type = "member" and
+    github.action = "added"
+  output: >
+    Collaborator added to repository 
+    (repo=%github.repo collaborator=%github.collaborator.name actor=%github.user)
+  priority: NOTICE
+  source: github
+  tags: [github, repository, collaborator]
+
+# Detect Deploy Key Added
+- rule: GitHub Deploy Key Added
+  desc: Detect when deploy keys are added to a repository
+  condition: >
+    github.type = "deploy_key" and
+    github.action = "created"
+  output: >
+    Deploy key added to repository 
+    (repo=%github.repo actor=%github.user)
+  priority: WARNING
+  source: github
+  tags: [github, repository, deploy-key]
+
+# Detect Webhook Created
+- rule: GitHub Webhook Created
+  desc: Detect when webhooks are created for a repository
+  condition: >
+    github.type = "hook" and
+    github.action = "created"
+  output: >
+    Webhook created for repository 
+    (repo=%github.repo actor=%github.user)
+  priority: NOTICE
+  source: github
+  tags: [github, webhook, integration]
+
+# Detect Secret Scanning Alert
+- rule: GitHub Secret Scanning Alert
+  desc: Detect when secret scanning finds exposed secrets
+  condition: >
+    github.type = "secret_scanning_alert" and
+    github.action = "created"
+  output: >
+    Secret exposed in GitHub repository 
+    (repo=%github.repo org=%github.org)
+  priority: CRITICAL
+  source: github
+  tags: [github, secrets, security]
