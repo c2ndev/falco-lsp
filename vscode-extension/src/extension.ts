@@ -16,8 +16,15 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { workspace, window, commands, StatusBarAlignment, languages, Uri } from 'vscode';
-import type { ExtensionContext, OutputChannel, StatusBarItem } from 'vscode';
+import {
+  workspace,
+  window,
+  commands,
+  StatusBarAlignment,
+  languages,
+  DiagnosticSeverity,
+} from 'vscode';
+import type { ExtensionContext, OutputChannel, StatusBarItem, Uri } from 'vscode';
 import { LanguageClient, State } from 'vscode-languageclient/node.js';
 import type {
   LanguageClientOptions,
@@ -85,8 +92,9 @@ function registerCommands(context: ExtensionContext): void {
         await startLanguageServer(context);
         window.showInformationMessage('Falco language server restarted');
         return null; // Explicitly return null to satisfy VS Code command protocol
-      } catch (error) {
-        window.showErrorMessage(`Failed to restart language server: ${error}`);
+      } catch (error: unknown) {
+        const errMsg = error instanceof Error ? error.message : String(error);
+        window.showErrorMessage(`Failed to restart language server: ${errMsg}`);
         return null;
       }
     })
@@ -153,14 +161,21 @@ function registerCommands(context: ExtensionContext): void {
 
           // Get diagnostics for this file
           const diagnostics = languages.getDiagnostics(fileUri);
-          const errors = diagnostics.filter(d => d.severity === 0).length; // Error = 0
-          const warnings = diagnostics.filter(d => d.severity === 1).length; // Warning = 1
-          const infos = diagnostics.filter(d => d.severity === 2 || d.severity === 3).length; // Info/Hint
+          const errors = diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length;
+          const warnings = diagnostics.filter(
+            d => d.severity === DiagnosticSeverity.Warning
+          ).length;
+          const infos = diagnostics.filter(
+            d =>
+              d.severity === DiagnosticSeverity.Information ||
+              d.severity === DiagnosticSeverity.Hint
+          ).length;
 
           fileResults.push({ uri: fileUri, errors, warnings, infos });
-        } catch (error) {
+        } catch (error: unknown) {
           outputChannel.appendLine(`❌ Failed to open: ${fileUri.fsPath}`);
-          outputChannel.appendLine(`   Error: ${error}\n`);
+          const errMsg = error instanceof Error ? error.message : String(error);
+          outputChannel.appendLine(`   Error: ${errMsg}\n`);
         }
       }
 

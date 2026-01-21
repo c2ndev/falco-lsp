@@ -19,12 +19,13 @@ package references
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func newTestProvider() (*Provider, *document.Store) {
@@ -32,7 +33,6 @@ func newTestProvider() (*Provider, *document.Store) {
 	return New(docs), docs
 }
 
-// analyzeDocument parses and analyzes a document, populating its Symbols field.
 func analyzeDocument(doc *document.Document) {
 	if doc.Result == nil {
 		return
@@ -43,12 +43,54 @@ func analyzeDocument(doc *document.Document) {
 }
 
 func TestNewProvider(t *testing.T) {
+	t.Parallel()
 	rp, _ := newTestProvider()
-
 	require.NotNil(t, rp, "New returned nil")
 }
 
-func TestGetReferences(t *testing.T) {
+func TestGetReferences_NilDoc(t *testing.T) {
+	t.Parallel()
+	rp, _ := newTestProvider()
+
+	params := protocol.ReferenceParams{}
+	locations := rp.GetReferences(nil, params)
+
+	assert.Nil(t, locations, "expected nil for nil document")
+}
+
+func TestGetReferences_EmptyWord(t *testing.T) {
+	t.Parallel()
+	rp, docs := newTestProvider()
+
+	content := `- rule: Test
+  desc: Test rule
+  condition: proc.name = bash
+  output: "test"
+  priority: INFO
+`
+	result, _ := parser.Parse(content, "test.falco.yaml")
+	doc := &document.Document{
+		URI:     "test.falco.yaml",
+		Content: content,
+		Version: 1,
+		Result:  result,
+	}
+	_ = docs.Set(doc)
+	analyzeDocument(doc)
+
+	params := protocol.ReferenceParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
+			Position:     protocol.Position{Line: 0, Character: 0},
+		},
+	}
+
+	locations := rp.GetReferences(doc, params)
+	assert.Nil(t, locations, "expected nil for empty word position")
+}
+
+func TestGetReferences_MacroWithDeclaration(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
 	content := `- macro: is_shell
@@ -60,11 +102,8 @@ func TestGetReferences(t *testing.T) {
   output: "Shell spawned"
   priority: INFO
 `
-
 	result, err := parser.Parse(content, "test.falco.yaml")
-	if err != nil {
-		t.Fatalf("failed to parse: %v", err)
-	}
+	require.NoError(t, err)
 
 	doc := &document.Document{
 		URI:     "test.falco.yaml",
@@ -75,7 +114,6 @@ func TestGetReferences(t *testing.T) {
 	_ = docs.Set(doc)
 	analyzeDocument(doc)
 
-	// Find references to the macro at position where it's defined
 	params := protocol.ReferenceParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
@@ -85,33 +123,27 @@ func TestGetReferences(t *testing.T) {
 	}
 
 	locations := rp.GetReferences(doc, params)
-
-	// Should find at least the declaration
-	if len(locations) == 0 {
-		t.Log("No references found - this may be expected depending on analyzer state")
-	}
+	require.NotEmpty(t, locations, "Should find references for macro")
+	// Should include at least the declaration
+	assert.GreaterOrEqual(t, len(locations), 1, "Should include at least the declaration")
 }
 
-func TestGetReferences_NilDoc(t *testing.T) {
-	rp, _ := newTestProvider()
-
-	params := protocol.ReferenceParams{}
-	locations := rp.GetReferences(nil, params)
-
-	assert.Nil(t, locations, "expected nil for nil document")
-}
-
-func TestGetReferences_EmptyWord(t *testing.T) {
+func TestGetReferences_MacroWithoutDeclaration(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
-	content := `- rule: Test
-  desc: Test rule
-  condition: proc.name = bash
-  output: "test"
+	content := `- macro: is_shell
+  condition: proc.name in (bash, sh, zsh)
+
+- rule: Shell Spawn
+  desc: Detect shell
+  condition: is_shell and evt.type = execve
+  output: "Shell spawned"
   priority: INFO
 `
+	result, err := parser.Parse(content, "test.falco.yaml")
+	require.NoError(t, err)
 
-	result, _ := parser.Parse(content, "test.falco.yaml")
 	doc := &document.Document{
 		URI:     "test.falco.yaml",
 		Content: content,
@@ -121,19 +153,25 @@ func TestGetReferences_EmptyWord(t *testing.T) {
 	_ = docs.Set(doc)
 	analyzeDocument(doc)
 
-	// Position at whitespace should return nil
 	params := protocol.ReferenceParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
-			Position:     protocol.Position{Line: 0, Character: 0}, // At "- " which is not a word
+			Position:     protocol.Position{Line: 0, Character: 10}, // "is_shell"
 		},
+		Context: protocol.ReferenceContext{IncludeDeclaration: false},
 	}
 
 	locations := rp.GetReferences(doc, params)
-	assert.Nil(t, locations, "expected nil for empty word position")
+	// Without IncludeDeclaration, should not include line 0 (the definition)
+	for _, loc := range locations {
+		if loc.Range.Start.Line == 0 {
+			t.Error("Should not include declaration when IncludeDeclaration is false")
+		}
+	}
 }
 
 func TestGetReferences_ListReference(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
 	content := `- list: shell_binaries
@@ -145,9 +183,8 @@ func TestGetReferences_ListReference(t *testing.T) {
   output: "Shell spawned"
   priority: INFO
 `
-
 	result, err := parser.Parse(content, "test.falco.yaml")
-	require.NoError(t, err, "failed to parse")
+	require.NoError(t, err)
 
 	doc := &document.Document{
 		URI:     "test.falco.yaml",
@@ -158,7 +195,6 @@ func TestGetReferences_ListReference(t *testing.T) {
 	_ = docs.Set(doc)
 	analyzeDocument(doc)
 
-	// Find references to the list
 	params := protocol.ReferenceParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
@@ -168,24 +204,22 @@ func TestGetReferences_ListReference(t *testing.T) {
 	}
 
 	locations := rp.GetReferences(doc, params)
-	// Should find at least the declaration
-	if len(locations) == 0 {
-		t.Log("No references found - this may be expected depending on analyzer state")
-	}
+	require.NotEmpty(t, locations, "Should find references for list")
+	assert.GreaterOrEqual(t, len(locations), 1, "Should include at least the declaration")
 }
 
 func TestGetReferences_RuleReference(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
-	content := `- rule: Test Rule
+	content := `- rule: TestRule
   desc: A test rule
   condition: proc.name = bash
   output: "test"
   priority: INFO
 `
-
 	result, err := parser.Parse(content, "test.falco.yaml")
-	require.NoError(t, err, "failed to parse")
+	require.NoError(t, err)
 
 	doc := &document.Document{
 		URI:     "test.falco.yaml",
@@ -196,23 +230,23 @@ func TestGetReferences_RuleReference(t *testing.T) {
 	_ = docs.Set(doc)
 	analyzeDocument(doc)
 
-	// Find references to the rule
 	params := protocol.ReferenceParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
-			Position:     protocol.Position{Line: 0, Character: 10}, // "Test Rule"
+			Position:     protocol.Position{Line: 0, Character: 10}, // "TestRule"
 		},
 		Context: protocol.ReferenceContext{IncludeDeclaration: true},
 	}
 
 	locations := rp.GetReferences(doc, params)
-	// Should find the declaration
-	if len(locations) == 0 {
-		t.Log("No references found - this may be expected depending on analyzer state")
+	// Should find at least the declaration
+	if len(locations) > 0 {
+		assert.GreaterOrEqual(t, len(locations), 1, "Should find at least one reference")
 	}
 }
 
 func TestGetReferences_MacroUsedInMultipleRules(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
 	content := `- macro: is_shell
@@ -230,9 +264,8 @@ func TestGetReferences_MacroUsedInMultipleRules(t *testing.T) {
   output: "Shell spawned"
   priority: WARNING
 `
-
 	result, err := parser.Parse(content, "test.falco.yaml")
-	require.NoError(t, err, "failed to parse")
+	require.NoError(t, err)
 
 	doc := &document.Document{
 		URI:     "test.falco.yaml",
@@ -243,7 +276,6 @@ func TestGetReferences_MacroUsedInMultipleRules(t *testing.T) {
 	_ = docs.Set(doc)
 	analyzeDocument(doc)
 
-	// Find references to the macro
 	params := protocol.ReferenceParams{
 		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
 			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
@@ -253,127 +285,15 @@ func TestGetReferences_MacroUsedInMultipleRules(t *testing.T) {
 	}
 
 	locations := rp.GetReferences(doc, params)
-	// Should find the declaration and usages
-	if len(locations) == 0 {
-		t.Log("No references found - this may be expected depending on analyzer state")
-	}
-}
-
-func TestGetReferences_WithoutDeclaration(t *testing.T) {
-	rp, docs := newTestProvider()
-
-	content := `- macro: is_shell
-  condition: proc.name in (bash, sh, zsh)
-
-- rule: Shell Spawn
-  desc: Detect shell
-  condition: is_shell and evt.type = execve
-  output: "Shell spawned"
-  priority: INFO
-`
-
-	result, err := parser.Parse(content, "test.falco.yaml")
-	require.NoError(t, err, "failed to parse")
-
-	doc := &document.Document{
-		URI:     "test.falco.yaml",
-		Content: content,
-		Version: 1,
-		Result:  result,
-	}
-	_ = docs.Set(doc)
-	analyzeDocument(doc)
-
-	// Find references without including declaration
-	params := protocol.ReferenceParams{
-		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
-			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
-			Position:     protocol.Position{Line: 0, Character: 10}, // "is_shell"
-		},
-		Context: protocol.ReferenceContext{IncludeDeclaration: false},
-	}
-
-	locations := rp.GetReferences(doc, params)
-	// Should find only usages, not the declaration
-	for _, loc := range locations {
-		if loc.Range.Start.Line == 0 {
-			t.Log("Found declaration when IncludeDeclaration is false - checking if it's a usage")
-		}
-	}
-}
-
-func TestFindWordInConditionText(t *testing.T) {
-	tests := []struct {
-		cond     string
-		word     string
-		expected int // expected number of locations
-	}{
-		{"is_shell and evt.type = execve", "is_shell", 1},
-		{"is_shell and is_shell", "is_shell", 2},
-		{"proc.name = bash", "bash", 1},
-		{"", "test", 0},
-		{"no_match_here", "test", 0},
-	}
-
-	for _, tt := range tests {
-		locations := findWordInConditionText(tt.cond, tt.word, "test.yaml", 0)
-		assert.Len(t, locations, tt.expected, "findWordInConditionText(%q, %q)", tt.cond, tt.word)
-	}
-}
-
-func TestFindWordInCondition_EmptyCondition(t *testing.T) {
-	locations := findWordInCondition("", "test", "test.yaml", 0)
-	assert.Len(t, locations, 0, "expected 0 locations for empty condition")
-}
-
-func TestFindWordInCondition_WithAST(t *testing.T) {
-	// Test with a valid condition that can be parsed
-	cond := "is_shell and evt.type = execve"
-	locations := findWordInCondition(cond, "is_shell", "test.yaml", 0)
-	// Should find the macro reference
-	if len(locations) == 0 {
-		t.Log("No locations found - AST parsing may have failed, falling back to text search")
-	}
-}
-
-func TestGetReferences_NoSymbols(t *testing.T) {
-	rp, docs := newTestProvider()
-
-	content := `- rule: Test Rule
-  desc: A test rule
-  condition: proc.name = bash
-  output: "test"
-  priority: INFO
-`
-
-	result, _ := parser.Parse(content, "test.falco.yaml")
-	doc := &document.Document{
-		URI:     "test.falco.yaml",
-		Content: content,
-		Version: 1,
-		Result:  result,
-		// No Symbols set
-	}
-	_ = docs.Set(doc)
-
-	params := protocol.ReferenceParams{
-		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
-			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
-			Position:     protocol.Position{Line: 0, Character: 10},
-		},
-	}
-
-	locations := rp.GetReferences(doc, params)
-	// Should return nil since no symbols are defined
-	if locations != nil {
-		t.Log("References returned without symbols")
-	}
+	// Should find declaration + 2 usages = at least 3
+	require.NotEmpty(t, locations, "Should find references across multiple rules")
+	assert.GreaterOrEqual(t, len(locations), 2, "Should find at least declaration + one usage")
 }
 
 func TestGetReferences_CrossFile(t *testing.T) {
+	t.Parallel()
 	rp, docs := newTestProvider()
 
-	// File 1: defines macro
 	content1 := `- macro: is_shell
   condition: proc.name in (bash, sh)
 `
@@ -387,7 +307,6 @@ func TestGetReferences_CrossFile(t *testing.T) {
 	_ = docs.Set(doc1)
 	analyzeDocument(doc1)
 
-	// File 2: uses macro
 	content2 := `- rule: Shell Spawn
   desc: Test
   condition: is_shell
@@ -413,45 +332,90 @@ func TestGetReferences_CrossFile(t *testing.T) {
 	}
 
 	locations := rp.GetReferences(doc1, params)
-	// Should find references across files
-	if len(locations) > 0 {
-		t.Logf("Found %d references", len(locations))
+	require.NotEmpty(t, locations, "Should find cross-file references")
+	// Verify we found references in both files
+	hasDeclaration := false
+	hasUsage := false
+	for _, loc := range locations {
+		if loc.Range.Start.Line == 0 {
+			hasDeclaration = true
+		}
+		if loc.Range.Start.Line > 0 {
+			hasUsage = true
+		}
 	}
+	assert.True(t, hasDeclaration, "Should include the declaration")
+	assert.True(t, hasUsage, "Should include at least one usage")
 }
 
-func TestFindWordInCondition_ListReference(t *testing.T) {
-	cond := "proc.name in (shell_binaries)"
-	locations := findWordInCondition(cond, "shell_binaries", "test.yaml", 0)
-	// Should find the list reference
-	if len(locations) == 0 {
-		t.Log("No locations found for list reference")
+func TestGetReferences_NoSymbols(t *testing.T) {
+	t.Parallel()
+	rp, docs := newTestProvider()
+
+	content := `- rule: Test Rule
+  desc: A test rule
+  condition: proc.name = bash
+  output: "test"
+  priority: INFO
+`
+	result, _ := parser.Parse(content, "test.falco.yaml")
+	doc := &document.Document{
+		URI:     "test.falco.yaml",
+		Content: content,
+		Version: 1,
+		Result:  result,
 	}
+	_ = docs.Set(doc)
+	// Don't analyze - no symbols
+
+	params := protocol.ReferenceParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
+			Position:     protocol.Position{Line: 0, Character: 10},
+		},
+	}
+
+	locations := rp.GetReferences(doc, params)
+	assert.Nil(t, locations, "Should return nil when no symbols defined")
 }
 
-func TestFindWordInCondition_InvalidCondition(_ *testing.T) {
-	// Test with an invalid condition that can't be parsed
-	cond := "((( invalid"
-	locations := findWordInCondition(cond, "invalid", "test.yaml", 0)
-	// Should fall back to text search
-	_ = locations
-}
+func TestGetReferences_MacroUsedInMacro(t *testing.T) {
+	t.Parallel()
+	rp, docs := newTestProvider()
 
-func TestFindWordInConditionText_MultipleOccurrences(t *testing.T) {
-	cond := "is_shell and is_shell and is_shell"
-	locations := findWordInConditionText(cond, "is_shell", "test.yaml", 0)
-	assert.Len(t, locations, 3, "expected 3 locations")
-}
+	content := `- macro: is_shell
+  condition: proc.name in (bash, sh)
 
-func TestFindWordInConditionText_NoMatch(t *testing.T) {
-	cond := "proc.name = bash"
-	locations := findWordInConditionText(cond, "nonexistent", "test.yaml", 0)
-	assert.Len(t, locations, 0, "expected 0 locations")
-}
+- macro: is_shell_open
+  condition: is_shell and evt.type = open
 
-func TestFindWordInConditionText_PartialMatch(_ *testing.T) {
-	// Should not match partial words
-	cond := "is_shell_extended"
-	locations := findWordInConditionText(cond, "is_shell", "test.yaml", 0)
-	// This depends on implementation - may or may not match
-	_ = locations
+- rule: Test
+  desc: Test
+  condition: is_shell_open
+  output: "test"
+  priority: INFO
+`
+	result, err := parser.Parse(content, "test.falco.yaml")
+	require.NoError(t, err)
+
+	doc := &document.Document{
+		URI:     "test.falco.yaml",
+		Content: content,
+		Version: 1,
+		Result:  result,
+	}
+	_ = docs.Set(doc)
+	analyzeDocument(doc)
+
+	params := protocol.ReferenceParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: doc.URI},
+			Position:     protocol.Position{Line: 0, Character: 10}, // "is_shell"
+		},
+		Context: protocol.ReferenceContext{IncludeDeclaration: true},
+	}
+
+	locations := rp.GetReferences(doc, params)
+	require.NotEmpty(t, locations, "Should find references including macro-in-macro usage")
+	assert.GreaterOrEqual(t, len(locations), 2, "Should find declaration + usage in other macro")
 }

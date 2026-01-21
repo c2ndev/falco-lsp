@@ -112,7 +112,7 @@ func TestIsWordChar(t *testing.T) {
 		{'9', true},
 		{'_', true},
 		{'.', true},  // For field-like completions
-		{'-', true},  // For MITRE tags like T1059.001-subtechnique
+		{'-', true},  // For MITER tags like T1059.001-subtechnique
 		{'[', false}, // Not included in word chars
 		{']', false},
 		{' ', false},

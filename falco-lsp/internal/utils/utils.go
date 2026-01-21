@@ -94,8 +94,8 @@ func JoinStrings(strs []string, sep string) string {
 }
 
 // ClampLineRange ensures start and end line indices are valid for a slice of given length.
-// Returns (start, end) where 0 <= start <= end <= length.
-func ClampLineRange(start, end, length int) (int, int) {
+// Returns (clampedStart, clampedEnd) where 0 <= clampedStart <= clampedEnd <= length.
+func ClampLineRange(start, end, length int) (clampedStart, clampedEnd int) {
 	if length <= 0 {
 		return 0, 0
 	}

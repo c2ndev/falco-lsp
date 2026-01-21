@@ -48,7 +48,7 @@ func IsFieldChar(r rune) bool {
 
 // IsWordChar returns true if r is a valid word character for general text contexts.
 // This is used by the completion and hover providers to identify word boundaries.
-// Includes dash (-) for completions like MITRE tags (mitre-attack, T1059.001).
+// Includes dash (-) for completions like MITER tags (miter-attack, T1059.001).
 func IsWordChar(r rune) bool {
 	return IsIdentifierChar(r) ||
 		r == '.' ||

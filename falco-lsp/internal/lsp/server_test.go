@@ -17,17 +17,25 @@
 package lsp
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"strings"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
+	"github.com/c2ndev/falco-lsp/internal/lsp/transport"
 	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // Test content constants to avoid repetition.
@@ -714,4 +722,250 @@ func TestInitLogger(t *testing.T) {
 	// Test with empty log file (should use stderr)
 	err := InitLogger("", 0)
 	assert.NoError(t, err, "InitLogger with empty file should not error")
+}
+
+func TestServerPublishDiagnostics(_ *testing.T) {
+	// Create a server with a mock transport to capture output
+	server := NewServer()
+
+	// Test publishDiagnostics with version
+	version := 1
+	diags := []protocol.Diagnostic{
+		{
+			Range: protocol.Range{
+				Start: protocol.Position{Line: 0, Character: 0},
+				End:   protocol.Position{Line: 0, Character: 10},
+			},
+			Severity: protocol.DiagnosticSeverityError,
+			Message:  "Test error",
+		},
+	}
+
+	// This will fail to write (no real transport), but should not panic
+	server.publishDiagnostics("file:///test.yaml", &version, diags)
+
+	// Test without version
+	server.publishDiagnostics("file:///test.yaml", nil, diags)
+}
+
+func TestServerHandleMessageExit(t *testing.T) {
+	// We can't actually test exit because it calls os.Exit
+	// But we can verify the method exists and the code path is correct
+	server := NewServer()
+
+	// Test that handleMessage returns nil for exit (before os.Exit is called)
+	// Note: We can't actually call this because os.Exit will terminate the test
+	// This is just to document the expected behavior
+	_ = server
+
+	// Instead, test other message handling paths
+	msg := &protocol.Message{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  protocol.MethodInitialize,
+		Params:  []byte(`{}`),
+	}
+	response := server.handleMessage(msg)
+	assert.NotNil(t, response, "expected response for initialize")
+}
+
+func TestServerHandleUnknownMethod(t *testing.T) {
+	server := NewServer()
+
+	msg := &protocol.Message{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "unknown/method",
+	}
+
+	response := server.handleMessage(msg)
+	require.NotNil(t, response, "expected response for unknown method")
+	assert.NotNil(t, response.Error, "expected error for unknown method")
+}
+
+func TestServerHandleNotification(t *testing.T) {
+	server := NewServer()
+
+	// Test initialized notification (no ID = notification)
+	msg := &protocol.Message{
+		JSONRPC: "2.0",
+		Method:  protocol.MethodInitialized,
+	}
+
+	response := server.handleMessage(msg)
+	assert.Nil(t, response, "notifications should not return a response")
+}
+
+func TestServerProviderAccessors(t *testing.T) {
+	server := NewServer()
+
+	// Test all provider accessors
+	assert.NotNil(t, server.Documents(), "Documents() should not be nil")
+	assert.NotNil(t, server.Completion(), "Completion() should not be nil")
+	assert.NotNil(t, server.Hover(), "Hover() should not be nil")
+	assert.NotNil(t, server.Definition(), "Definition() should not be nil")
+	assert.NotNil(t, server.Symbols(), "Symbols() should not be nil")
+	assert.NotNil(t, server.References(), "References() should not be nil")
+	assert.NotNil(t, server.Formatting(), "Formatting() should not be nil")
+}
+
+func TestServerRunWithContext_ContextCanceled(t *testing.T) {
+	// Create a pipe for mock I/O
+	reader, writer := io.Pipe()
+	var output bytes.Buffer
+
+	// Create server with mock transport
+	tr := transport.New(reader, &output)
+	server := NewServerWithTransport(tr)
+
+	// Create a context that we'll cancel
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Run server in goroutine
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- server.RunWithContext(ctx)
+	}()
+
+	// Give the server time to start
+	time.Sleep(10 * time.Millisecond)
+
+	// Cancel the context
+	cancel()
+
+	// Close the writer to unblock any pending reads
+	_ = writer.Close()
+
+	// Wait for server to exit
+	select {
+	case err := <-errChan:
+		// Context canceled error is expected
+		assert.True(t, errors.Is(err, context.Canceled) || err == nil, "expected context.Canceled or nil, got %v", err)
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not exit after context cancellation")
+	}
+
+	_ = reader.Close()
+}
+
+func TestServerRunWithContext_EOF(t *testing.T) {
+	// Create a pipe for mock I/O
+	reader, writer := io.Pipe()
+	var output bytes.Buffer
+
+	// Create server with mock transport
+	tr := transport.New(reader, &output)
+	server := NewServerWithTransport(tr)
+
+	// Run server in goroutine
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- server.RunWithContext(context.Background())
+	}()
+
+	// Give the server time to start
+	time.Sleep(10 * time.Millisecond)
+
+	// Close the writer to send EOF
+	_ = writer.Close()
+
+	// Wait for server to exit
+	select {
+	case err := <-errChan:
+		// EOF should result in nil error (clean shutdown)
+		assert.NoError(t, err, "expected nil error on EOF")
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not exit after EOF")
+	}
+
+	_ = reader.Close()
+}
+
+func TestServerRunWithContext_ShutdownRequest(t *testing.T) {
+	// Create a pipe for mock I/O
+	reader, writer := io.Pipe()
+	var output bytes.Buffer
+
+	// Create server with mock transport
+	tr := transport.New(reader, &output)
+	server := NewServerWithTransport(tr)
+
+	// Run server in goroutine
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- server.RunWithContext(context.Background())
+	}()
+
+	// Give the server time to start
+	time.Sleep(10 * time.Millisecond)
+
+	// Send shutdown request
+	shutdownMsg := `{"jsonrpc":"2.0","id":1,"method":"shutdown"}`
+	header := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(shutdownMsg))
+	_, err := writer.Write([]byte(header + shutdownMsg))
+	require.NoError(t, err, "failed to write shutdown message")
+
+	// Give server time to process
+	time.Sleep(50 * time.Millisecond)
+
+	// Close the writer
+	_ = writer.Close()
+
+	// Wait for server to exit
+	select {
+	case err := <-errChan:
+		// Should exit cleanly after shutdown
+		assert.NoError(t, err, "expected nil error after shutdown")
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not exit after shutdown")
+	}
+
+	_ = reader.Close()
+}
+
+func TestServerRun(t *testing.T) {
+	// Create a pipe for mock I/O
+	reader, writer := io.Pipe()
+	var output bytes.Buffer
+
+	// Create server with mock transport
+	tr := transport.New(reader, &output)
+	server := NewServerWithTransport(tr)
+
+	// Run server in goroutine
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- server.Run()
+	}()
+
+	// Give the server time to start
+	time.Sleep(10 * time.Millisecond)
+
+	// Close the writer to send EOF
+	_ = writer.Close()
+
+	// Wait for server to exit
+	select {
+	case err := <-errChan:
+		// EOF should result in nil error
+		assert.NoError(t, err, "expected nil error on EOF")
+	case <-time.After(2 * time.Second):
+		t.Fatal("server did not exit after EOF")
+	}
+
+	_ = reader.Close()
+}
+
+func TestNewServerWithTransport(t *testing.T) {
+	// Create a mock transport
+	reader := strings.NewReader("")
+	var output bytes.Buffer
+	tr := transport.New(reader, &output)
+
+	// Create server with custom transport
+	server := NewServerWithTransport(tr)
+
+	require.NotNil(t, server, "NewServerWithTransport returned nil")
+	assert.NotNil(t, server.Documents(), "documents should not be nil")
+	assert.NotNil(t, server.Completion(), "completion should not be nil")
 }

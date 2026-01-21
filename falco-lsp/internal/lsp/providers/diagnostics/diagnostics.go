@@ -96,6 +96,12 @@ func (p *Provider) AnalyzeAndPublish(doc *document.Document) {
 	p.publishDiagnostics(newDoc.URI, newDoc.Version, diagnostics)
 }
 
+// Diagnostic codes.
+const (
+	// CodeParseError is the diagnostic code for YAML parse errors.
+	CodeParseError = "parse-error"
+)
+
 // publishParseError publishes a parse error as a diagnostic.
 func (p *Provider) publishParseError(doc *document.Document, err error) {
 	line := p.extractLineFromError(err.Error(), doc.Content)
@@ -108,7 +114,7 @@ func (p *Provider) publishParseError(doc *document.Document, err error) {
 		Severity: protocol.DiagnosticSeverityError,
 		Message:  err.Error(),
 		Source:   version.DiagnosticSource,
-		Code:     "parse-error",
+		Code:     CodeParseError,
 	}}
 
 	p.publishDiagnostics(doc.URI, doc.Version, diagnostics)
@@ -130,17 +136,14 @@ func (p *Provider) extractLineFromError(errMsg, content string) int {
 					// Validate line number is within bounds
 					lines := strings.Split(content, "\n")
 					if line >= len(lines) {
-						line = len(lines) - 1
-						if line < 0 {
-							line = 0
-						}
+						line = max(0, len(lines)-1)
 					}
 				}
 			}
 		}
 	}
 
-	return line
+	return max(0, line)
 }
 
 // convertDiagnostics converts analyzer diagnostics to LSP diagnostics.
@@ -154,31 +157,12 @@ func (p *Provider) convertDiagnostics(diags []analyzer.Diagnostic) []protocol.Di
 	for _, d := range diags {
 		severity := p.convertSeverity(d.Severity)
 
-		// Convert 1-based positions to 0-based for LSP
-		startLine := d.Range.Start.Line - 1
-		startChar := d.Range.Start.Column - 1
-		endLine := d.Range.End.Line - 1
-		endChar := d.Range.End.Column - 1
-
-		// Ensure non-negative values
-		if startLine < 0 {
-			startLine = 0
-		}
-		if startChar < 0 {
-			startChar = 0
-		}
-		if endLine < 0 {
-			endLine = 0
-		}
-		if endChar < 0 {
-			endChar = 0
-		}
+		// Convert 1-based positions to 0-based for LSP using centralized utilities
+		startPos := protocol.ToLSPPosition(d.Range.Start.Line, d.Range.Start.Column)
+		endPos := protocol.ToLSPPosition(d.Range.End.Line, d.Range.End.Column)
 
 		result = append(result, protocol.Diagnostic{
-			Range: protocol.Range{
-				Start: protocol.Position{Line: startLine, Character: startChar},
-				End:   protocol.Position{Line: endLine, Character: endChar},
-			},
+			Range:    protocol.NewRange(startPos, endPos),
 			Severity: severity,
 			Code:     d.Code,
 			Message:  d.Message,
@@ -206,7 +190,7 @@ func (p *Provider) convertSeverity(s analyzer.Severity) int {
 }
 
 // publishDiagnostics sends diagnostics to the client.
-func (p *Provider) publishDiagnostics(uri string, version int, diagnostics []protocol.Diagnostic) {
+func (p *Provider) publishDiagnostics(uri string, docVersion int, diagnostics []protocol.Diagnostic) {
 	if diagnostics == nil {
 		diagnostics = []protocol.Diagnostic{}
 	}
@@ -216,7 +200,7 @@ func (p *Provider) publishDiagnostics(uri string, version int, diagnostics []pro
 		diagnostics = diagnostics[:p.maxDiagnostics]
 	}
 
-	p.publish(uri, &version, diagnostics)
+	p.publish(uri, &docVersion, diagnostics)
 }
 
 // ClearDiagnostics clears all diagnostics for a document.

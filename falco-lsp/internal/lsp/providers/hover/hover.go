@@ -18,9 +18,11 @@ package hover
 import (
 	"fmt"
 
+	"github.com/c2ndev/falco-lsp/internal/config"
 	"github.com/c2ndev/falco-lsp/internal/fields"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
+	"github.com/c2ndev/falco-lsp/internal/lsp/providers"
 )
 
 // Provider handles hover requests.
@@ -37,71 +39,81 @@ func New(docs *document.Store) *Provider {
 
 // GetHover returns hover information for the given position.
 func (p *Provider) GetHover(doc *document.Document, params protocol.TextDocumentPositionParams) *protocol.Hover {
-	if doc == nil {
-		return nil
-	}
-
-	word := doc.GetWordAtPosition(params.Position)
-	if word == "" {
+	// Use shared helper to get word at position
+	lookup := providers.GetSymbolAtPosition(doc, p.documents, params.Position)
+	if lookup == nil {
 		return nil
 	}
 
 	// Check if it's a Falco field
-	if field := fields.GetField(word); field != nil {
-		content := fmt.Sprintf("**%s** (%s)\n\n%s", field.Name, field.Type, field.Description)
-		if field.IsDynamic {
-			content += "\n\n*This field accepts an argument*"
-		}
-		return &protocol.Hover{
-			Contents: protocol.MarkupContent{
-				Kind:  protocol.MarkupKindMarkdown,
-				Value: content,
-			},
-		}
+	if hover := p.getFieldHover(lookup.Word); hover != nil {
+		return hover
 	}
 
-	// Check if it's a user-defined macro
-	symbols := p.documents.GetAllSymbols()
-	if symbols != nil {
-		if macro, ok := symbols.Macros[word]; ok {
-			return &protocol.Hover{
-				Contents: protocol.MarkupContent{
-					Kind:  protocol.MarkupKindMarkdown,
-					Value: fmt.Sprintf("**Macro: %s**\n\n```\n%s\n```\n\nDefined in: %s", word, macro.Condition, macro.File),
-				},
-			}
-		}
+	// Check if it's a user-defined symbol
+	return p.getSymbolHover(lookup)
+}
 
-		// Check if it's a user-defined list
-		if list, ok := symbols.Lists[word]; ok {
-			itemsPreview := ""
-			if len(list.Items) > 0 {
-				items := list.Items
-				if len(items) > 10 {
-					items = items[:10]
-					itemsPreview = fmt.Sprintf("%v... (and %d more)", items, len(list.Items)-10)
-				} else {
-					itemsPreview = fmt.Sprintf("%v", items)
-				}
-			}
-			return &protocol.Hover{
-				Contents: protocol.MarkupContent{
-					Kind:  protocol.MarkupKindMarkdown,
-					Value: fmt.Sprintf("**List: %s**\n\nItems: %s\n\nDefined in: %s", word, itemsPreview, list.File),
-				},
-			}
-		}
+// getFieldHover returns hover information for a Falco field.
+func (p *Provider) getFieldHover(word string) *protocol.Hover {
+	field := fields.GetField(word)
+	if field == nil {
+		return nil
+	}
 
-		// Check if it's a user-defined rule
-		if rule, ok := symbols.Rules[word]; ok {
-			return &protocol.Hover{
-				Contents: protocol.MarkupContent{
-					Kind:  protocol.MarkupKindMarkdown,
-					Value: fmt.Sprintf("**Rule: %s**\n\nSource: %s\n\nDefined in: %s", word, rule.Source, rule.File),
-				},
-			}
-		}
+	content := fmt.Sprintf("**%s** (%s)\n\n%s", field.Name, field.Type, field.Description)
+	if field.IsDynamic {
+		content += "\n\n*This field accepts an argument*"
+	}
+	return newMarkdownHover(content)
+}
+
+// getSymbolHover returns hover information for a user-defined symbol.
+func (p *Provider) getSymbolHover(lookup *providers.SymbolLookup) *protocol.Hover {
+	word := lookup.Word
+	symbols := lookup.Symbols
+
+	// Check macro
+	if macro, ok := symbols.Macros[word]; ok {
+		content := fmt.Sprintf("**Macro: %s**\n\n```\n%s\n```\n\nDefined in: %s", word, macro.Condition, macro.File)
+		return newMarkdownHover(content)
+	}
+
+	// Check list
+	if list, ok := symbols.Lists[word]; ok {
+		itemsPreview := formatListPreview(list.Items)
+		content := fmt.Sprintf("**List: %s**\n\nItems: %s\n\nDefined in: %s", word, itemsPreview, list.File)
+		return newMarkdownHover(content)
+	}
+
+	// Check rule
+	if rule, ok := symbols.Rules[word]; ok {
+		content := fmt.Sprintf("**Rule: %s**\n\nSource: %s\n\nDefined in: %s", word, rule.Source, rule.File)
+		return newMarkdownHover(content)
 	}
 
 	return nil
+}
+
+// formatListPreview formats a list of items for hover display.
+func formatListPreview(items []string) string {
+	if len(items) == 0 {
+		return ""
+	}
+
+	maxItems := config.ListPreviewItemsHover
+	if len(items) > maxItems {
+		return fmt.Sprintf("%v... (and %d more)", items[:maxItems], len(items)-maxItems)
+	}
+	return fmt.Sprintf("%v", items)
+}
+
+// newMarkdownHover creates a Hover with markdown content.
+func newMarkdownHover(content string) *protocol.Hover {
+	return &protocol.Hover{
+		Contents: protocol.MarkupContent{
+			Kind:  protocol.MarkupKindMarkdown,
+			Value: content,
+		},
+	}
 }

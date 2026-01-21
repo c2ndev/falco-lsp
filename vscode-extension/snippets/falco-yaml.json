@@ -1,185 +1,47 @@
 {
-  "Falco Rule": {
-    "prefix": "rule-full",
-    "body": [
-      "rule: ${1:Rule Name}",
-      "  desc: ${2:Description}",
-      "  condition: ${3:condition}",
-      "  output: \"${4:Output message}\"",
-      "  priority: ${5|WARNING,CRITICAL,ERROR,ALERT,EMERGENCY,NOTICE,INFO,DEBUG|}",
-      "  tags: [${6:tag}]"
-    ],
-    "description": "Create a new Falco rule"
+  "Skip If Unknown Filter": {
+    "prefix": "skip-if-unknown-filter",
+    "body": "skip-if-unknown-filter: ${1|true,false|}$0",
+    "description": "Skip rule if filter fields are unknown (Falco Rules)"
   },
-  "Falco Macro": {
-    "prefix": "macro-full",
-    "body": ["macro: ${1:macro_name}", "  condition: ${2:condition}"],
-    "description": "Create a reusable condition macro"
+  "Condition: Container": {
+    "prefix": "container.id",
+    "body": "container.id != host",
+    "description": "Check if running inside a container"
   },
-  "Falco List": {
-    "prefix": "list-full",
-    "body": ["list: ${1:list_name}", "  items:", "    - ${2:item1}", "    - ${3:item2}"],
-    "description": "Create a list of values"
+  "Condition: Spawned Process": {
+    "prefix": "spawned_process",
+    "body": "spawned_process and ${1:condition}",
+    "description": "Detect process execution with additional conditions"
   },
-  "Falco Rule with Source": {
-    "prefix": "rule-source",
-    "body": [
-      "rule: ${1:Rule Name}",
-      "  desc: ${2:Description}",
-      "  condition: ${3:condition}",
-      "  output: \"${4:Output message}\"",
-      "  priority: ${5|WARNING,CRITICAL,ERROR,ALERT,EMERGENCY,NOTICE,INFO,DEBUG|}",
-      "  source: ${6|syscall,k8s_audit,aws_cloudtrail,okta,github|}",
-      "  tags: [${7:tag}]"
-    ],
-    "description": "Create a Falco rule with explicit source"
+  "Condition: Open File": {
+    "prefix": "open_read",
+    "body": "open_read and fd.name ${1|=,startswith,endswith,contains|} ${2:path}",
+    "description": "Detect file read operations"
   },
-  "Falco Rule with Exceptions": {
-    "prefix": "rule-exceptions",
-    "body": [
-      "rule: ${1:Rule Name}",
-      "  desc: ${2:Description}",
-      "  condition: ${3:condition}",
-      "  output: \"${4:Output message}\"",
-      "  priority: ${5|WARNING,CRITICAL,ERROR,ALERT,EMERGENCY,NOTICE,INFO,DEBUG|}",
-      "  tags: [${6:tag}]",
-      "  exceptions:",
-      "    - name: ${7:exception_name}",
-      "      fields: [${8:proc.name}]",
-      "      comps: [${9:=}]",
-      "      values:",
-      "        - [${10:value}]"
-    ],
-    "description": "Create a Falco rule with exceptions"
+  "Output: Process Info": {
+    "prefix": "output-process",
+    "body": "proc.name=%proc.name proc.cmdline=%proc.cmdline user.name=%user.name container.id=%container.id",
+    "description": "Process details for alert output"
   },
-  "Falco List Inline": {
-    "prefix": "list-inline",
-    "body": ["list: ${1:list_name}", "  items: [${2:item1, item2, item3}]"],
-    "description": "Create a list with inline items"
+  "Output: File Info": {
+    "prefix": "output-file",
+    "body": "file=%fd.name proc.name=%proc.name user.name=%user.name",
+    "description": "File operation details for alert output"
   },
-  "Append to Existing Rule": {
-    "prefix": "append-rule",
-    "body": [
-      "rule: ${1:Existing Rule Name}",
-      "  append: true",
-      "  condition: and ${2:additional_condition}"
-    ],
-    "description": "Append condition to an existing rule"
+  "Output: Network Info": {
+    "prefix": "output-network",
+    "body": "fd.name=%fd.name fd.sip=%fd.sip fd.sport=%fd.sport proc.name=%proc.name",
+    "description": "Network connection details for alert output"
   },
-  "Append to Existing Macro": {
-    "prefix": "append-macro",
-    "body": [
-      "macro: ${1:existing_macro_name}",
-      "  append: true",
-      "  condition: or ${2:additional_condition}"
-    ],
-    "description": "Append condition to an existing macro"
+  "Tag: MITRE ATT&CK": {
+    "prefix": "mitre",
+    "body": "${1|T1059,T1055,T1105,T1003,T1070,T1082,T1190,T1068,T1548|}.${2:technique}",
+    "description": "MITRE ATT&CK technique identifier"
   },
-  "Append to Existing List": {
-    "prefix": "append-list",
-    "body": [
-      "list: ${1:existing_list_name}",
-      "  append: true",
-      "  items:",
-      "    - ${2:additional_item}"
-    ],
-    "description": "Append items to an existing list"
-  },
-  "Override Rule Property": {
-    "prefix": "override-rule",
-    "body": [
-      "rule: ${1:Existing Rule Name}",
-      "  override:",
-      "    ${2|condition,output,priority,tags,enabled|}: replace",
-      "  ${2}: ${3:new_value}"
-    ],
-    "description": "Override a property of an existing rule"
-  },
-  "Syscall Condition": {
-    "prefix": "cond-syscall",
-    "body": [
-      "evt.type in (${1|execve,open,openat,read,write,connect,accept,clone,fork,vfork,kill|}) and ${2:additional_filter}"
-    ],
-    "description": "Condition filtering by syscall type"
-  },
-  "Container Filter": {
-    "prefix": "cond-container",
-    "body": ["container.id != \"\" and container.name != \"host\""],
-    "description": "Condition to match only containerized processes"
-  },
-  "K8s Audit Condition": {
-    "prefix": "cond-k8s-audit",
-    "body": [
-      "ka.target.resource = \"${1|pods,secrets,configmaps,serviceaccounts,deployments,daemonsets,replicasets|}\" and ka.verb in (${2:create, update, delete})"
-    ],
-    "description": "Condition for K8s audit events"
-  },
-  "K8s Namespace Filter": {
-    "prefix": "cond-namespace",
-    "body": ["k8s.ns.name = \"${1:namespace}\""],
-    "description": "Filter by Kubernetes namespace"
-  },
-  "Process Filter": {
-    "prefix": "cond-proc",
-    "body": ["proc.name = \"${1:process_name}\""],
-    "description": "Filter by process name"
-  },
-  "File Path Filter": {
-    "prefix": "cond-file",
-    "body": ["fd.name startswith \"${1:/path/to/}\" or fd.directory = \"${2:/path}\""],
-    "description": "Filter by file path"
-  },
-  "Network Connection Filter": {
-    "prefix": "cond-network",
-    "body": ["fd.typechar in (4, 6) and fd.sip != \"127.0.0.1\""],
-    "description": "Filter network connections"
-  },
-
-  "Exception": {
-    "prefix": "exception",
-    "body": [
-      "name: ${1:exception_name}",
-      "  fields: [${2:proc.name, container.image.repository}]",
-      "  comps: [${3:=, =}]",
-      "  values:",
-      "    - [${4:value1, value2}]"
-    ],
-    "description": "Add an exception to a rule"
-  },
-  "Output Fields - Process": {
-    "prefix": "output-proc",
-    "body": ["proc=%proc.name pid=%proc.pid user=%user.name cmdline=%proc.cmdline"],
-    "description": "Common output fields for process info"
-  },
-  "Output Fields - Container": {
-    "prefix": "output-container",
-    "body": [
-      "container=%container.name image=%container.image.repository pod=%k8s.pod.name ns=%k8s.ns.name"
-    ],
-    "description": "Common output fields for container info"
-  },
-  "Output Fields - K8s Audit": {
-    "prefix": "output-k8s",
-    "body": [
-      "user=%ka.user.name resource=%ka.target.resource name=%ka.target.name ns=%ka.target.namespace"
-    ],
-    "description": "Common output fields for K8s audit events"
-  },
-  "MITRE Tag": {
-    "prefix": "tag-mitre",
-    "body": [
-      "mitre_${1|initial_access,execution,persistence,privilege_escalation,defense_evasion,credential_access,discovery,lateral_movement,collection,exfiltration,command_and_control,impact|}"
-    ],
-    "description": "Add a MITRE ATT&CK tag"
-  },
-  "Required Engine Version": {
-    "prefix": "engine-version",
-    "body": ["required_engine_version: ${1:0.38.0}"],
-    "description": "Specify minimum Falco engine version"
-  },
-  "Required Plugin Version": {
-    "prefix": "plugin-version",
-    "body": ["required_plugin_versions:", "  - name: ${1:k8saudit}", "    version: ${2:0.7.0}"],
-    "description": "Specify required plugin version"
+  "Tags: Common": {
+    "prefix": "tags-common",
+    "body": "[${1|container,network,process,filesystem,host,k8s,aws,mitre_execution,mitre_persistence,mitre_privilege_escalation,mitre_defense_evasion,mitre_credential_access,mitre_discovery,mitre_lateral_movement,mitre_collection,mitre_exfiltration|}]",
+    "description": "Common categorization tags"
   }
 }

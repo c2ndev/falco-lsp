@@ -25,6 +25,92 @@ import (
 	"github.com/c2ndev/falco-lsp/internal/schema"
 )
 
+// validateRequiredFields validates that required fields are present in rules, macros, and lists.
+func (a *Analyzer) validateRequiredFields(doc *parser.Document) {
+	for _, item := range doc.Items {
+		switch it := item.(type) {
+		case parser.Rule:
+			// Skip validation for append rules (they don't need all fields)
+			if it.Append {
+				continue
+			}
+
+			// Check required fields for rules
+			if strings.TrimSpace(it.Desc) == "" {
+				a.addDiagnostic(SeverityError,
+					"rule 'desc' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"rule", "missing-required-field")
+			}
+			if strings.TrimSpace(it.Condition) == "" {
+				a.addDiagnostic(SeverityError,
+					"rule 'condition' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"rule", "missing-required-field")
+			}
+			if strings.TrimSpace(it.Output) == "" {
+				a.addDiagnostic(SeverityError,
+					"rule 'output' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"rule", "missing-required-field")
+			}
+			if strings.TrimSpace(it.Priority) == "" {
+				a.addDiagnostic(SeverityError,
+					"rule 'priority' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"rule", "missing-required-field")
+			}
+
+		case parser.Macro:
+			// Skip validation for append macros
+			if it.Append {
+				continue
+			}
+
+			// Check required fields for macros
+			if strings.TrimSpace(it.Condition) == "" {
+				a.addDiagnostic(SeverityError,
+					"macro 'condition' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"macro", "missing-required-field")
+			}
+
+		case parser.List:
+			// Skip validation for append lists
+			if it.Append {
+				continue
+			}
+
+			// Check required fields for lists
+			// Note: Empty items (items: []) is valid in Falco as a placeholder for append
+			if !it.HasItems {
+				a.addDiagnostic(SeverityError,
+					"list 'items' is required",
+					ast.Range{
+						Start: ast.Position{Line: it.Line, Column: it.Column},
+						End:   ast.Position{Line: it.Line, Column: it.Column + len(it.Name)},
+					},
+					"list", "missing-required-field")
+			}
+		}
+	}
+}
+
 // validateConditions validates all conditions in a document.
 func (a *Analyzer) validateConditions(doc *parser.Document) {
 	for _, item := range doc.Items {
@@ -33,20 +119,20 @@ func (a *Analyzer) validateConditions(doc *parser.Document) {
 			// Don't validate field sources in macros - they are context-dependent
 			// and will be validated when used in rules with a specific source.
 			// We still validate syntax and references (undefined macros/lists).
-			a.validateCondition(it.Condition, "", it.Line)
+			a.validateCondition(it.Condition, "", it.ConditionLine, it.ConditionCol)
 		case parser.Rule:
 			source := it.Source
 			if source == "" {
 				source = schema.DefaultSource.String()
 			}
 			a.currentSource = source
-			a.validateCondition(it.Condition, source, it.Line)
+			a.validateCondition(it.Condition, source, it.ConditionLine, it.ConditionCol)
 		}
 	}
 }
 
 // validateCondition validates a single condition expression.
-func (a *Analyzer) validateCondition(conditionStr, source string, line int) {
+func (a *Analyzer) validateCondition(conditionStr, source string, line, col int) {
 	if conditionStr == "" {
 		return
 	}
@@ -55,19 +141,19 @@ func (a *Analyzer) validateCondition(conditionStr, source string, line int) {
 
 	// Add parse errors with adjusted line numbers
 	for _, err := range result.Errors {
-		adjustedRange := a.adjustRangeForLine(err.Range, line)
+		adjustedRange := a.adjustRangeForLine(err.Range, line, col)
 		a.addDiagnostic(SeverityError, err.Message, adjustedRange, "condition", "parse-error")
 	}
 
 	// Walk the AST and validate references
 	if result.Expression != nil {
-		a.walkExpression(result.Expression, source, line)
+		a.walkExpression(result.Expression, source, line, col)
 	}
 }
 
 // validateField validates a field reference with line adjustment for proper error positioning.
-func (a *Analyzer) validateField(field *ast.FieldExpr, source string, line int) {
-	adjustedRange := a.adjustRangeForLine(field.Range, line)
+func (a *Analyzer) validateField(field *ast.FieldExpr, source string, line, col int) {
+	adjustedRange := a.adjustRangeForLine(field.Range, line, col)
 
 	f := a.fieldRegistry.GetField(field.Name)
 	if f == nil {
@@ -85,11 +171,29 @@ func (a *Analyzer) validateField(field *ast.FieldExpr, source string, line int) 
 	}
 
 	// Check dynamic field argument
-	if f.IsDynamic && field.Argument == "" {
+	// Skip if field already has an explicit argument in brackets (e.g., proc.aname[1])
+	// Also skip if the field name pattern suggests embedded argument (e.g., evt.arg.flags, proc.aname)
+	if f.IsDynamic && field.Argument == "" && !a.hasImplicitArgument(field.Name, f.Name) {
 		a.addDiagnostic(SeverityHint,
 			fmt.Sprintf("field %s is dynamic and may require an argument", field.Name),
 			adjustedRange, "field", schema.DiagMissingArgument.String())
 	}
+}
+
+// hasImplicitArgument checks if a field usage has an implicit argument embedded in its name.
+// For example, evt.arg.flags uses evt.arg as base with flags as the implicit argument.
+// Similarly, proc.aname refers to ancestor process name without needing explicit [N] index.
+func (a *Analyzer) hasImplicitArgument(fieldUsage, registeredName string) bool {
+	// If the field usage is longer than the registered name,
+	// the extra part is the implicit argument (e.g., evt.arg.flags vs evt.arg)
+	if len(fieldUsage) > len(registeredName) && strings.HasPrefix(fieldUsage, registeredName) {
+		// Check if there's a separator after the registered name
+		rest := fieldUsage[len(registeredName):]
+		if rest != "" && (rest[0] == '.' || rest[0] == '[') {
+			return true
+		}
+	}
+	return false
 }
 
 // isFieldValidForSource checks if a field is valid for a given source type.
@@ -123,12 +227,12 @@ func (a *Analyzer) isFieldValidForSource(fieldName, source string) bool {
 }
 
 // validateMacroRef validates a macro reference with line adjustment.
-func (a *Analyzer) validateMacroRef(ref *ast.MacroRef, line int) {
+func (a *Analyzer) validateMacroRef(ref *ast.MacroRef, line, col int) {
 	if ref.Name == "" {
 		return
 	}
 	if _, ok := a.symbols.Macros[ref.Name]; !ok {
-		adjustedRange := a.adjustRangeForLine(ref.Range, line)
+		adjustedRange := a.adjustRangeForLine(ref.Range, line, col)
 		a.addDiagnostic(SeverityWarning,
 			fmt.Sprintf("undefined macro: %s", ref.Name),
 			adjustedRange, "macro", schema.DiagUndefinedMacro.String())
@@ -136,12 +240,12 @@ func (a *Analyzer) validateMacroRef(ref *ast.MacroRef, line int) {
 }
 
 // validateListRef validates a list reference with line adjustment.
-func (a *Analyzer) validateListRef(ref *ast.ListRef, line int) {
+func (a *Analyzer) validateListRef(ref *ast.ListRef, line, col int) {
 	if ref.Name == "" {
 		return
 	}
 	if _, ok := a.symbols.Lists[ref.Name]; !ok {
-		adjustedRange := a.adjustRangeForLine(ref.Range, line)
+		adjustedRange := a.adjustRangeForLine(ref.Range, line, col)
 		a.addDiagnostic(SeverityWarning,
 			fmt.Sprintf("undefined list: %s", ref.Name),
 			adjustedRange, "list", schema.DiagUndefinedList.String())

@@ -54,7 +54,12 @@ type Server struct {
 
 // NewServer creates a new LSP server.
 func NewServer() *Server {
-	t := transport.New(os.Stdin, os.Stdout)
+	return NewServerWithTransport(transport.New(os.Stdin, os.Stdout))
+}
+
+// NewServerWithTransport creates a new LSP server with a custom transport.
+// This is primarily used for testing.
+func NewServerWithTransport(t *transport.Transport) *Server {
 	r := router.New()
 
 	s := &Server{
@@ -84,7 +89,7 @@ func (s *Server) Run() error {
 }
 
 // RunWithContext starts the LSP server main loop with the provided context.
-// The server will stop when the context is cancelled.
+// The server will stop when the context is canceled.
 func (s *Server) RunWithContext(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	s.cancel = cancel
@@ -124,7 +129,7 @@ func (s *Server) RunWithContext(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			logging.Info("Context cancelled, shutting down")
+			logging.Info("Context canceled, shutting down")
 			return ctx.Err()
 
 		case err := <-errChan:
@@ -160,16 +165,20 @@ func (s *Server) handleMessage(msg *protocol.Message) *protocol.Message {
 }
 
 // publishDiagnostics sends diagnostics to the client.
-func (s *Server) publishDiagnostics(uri string, version *int, diags []protocol.Diagnostic) {
+func (s *Server) publishDiagnostics(uri string, docVersion *int, diags []protocol.Diagnostic) {
 	params := protocol.PublishDiagnosticsParams{
 		URI:         uri,
 		Diagnostics: diags,
 	}
-	if version != nil {
-		params.Version = version
+	if docVersion != nil {
+		params.Version = docVersion
 	}
 
-	data, _ := json.Marshal(params)
+	data, err := json.Marshal(params)
+	if err != nil {
+		logging.Error("Failed to marshal diagnostics params", "error", err)
+		return
+	}
 	notification := protocol.NewNotification(protocol.MethodPublishDiagnostics, data)
 
 	if err := s.transport.WriteMessage(notification); err != nil {

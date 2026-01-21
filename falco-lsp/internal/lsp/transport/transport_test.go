@@ -24,9 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 )
 
 func TestTransport_ReadMessage(t *testing.T) {
@@ -157,7 +158,7 @@ func TestTransport_ReadMessageWithContext(t *testing.T) {
 		assert.Equal(t, protocol.MethodInitialize, msg.Method)
 	})
 
-	t.Run("context cancelled", func(t *testing.T) {
+	t.Run("context canceled", func(t *testing.T) {
 		// Create a reader that blocks forever
 		reader, _ := newBlockingReader()
 		transport := New(reader, nil)
@@ -179,7 +180,7 @@ type blockingReader struct {
 	ch chan struct{}
 }
 
-func newBlockingReader() (*blockingReader, func()) {
+func newBlockingReader() (reader *blockingReader, cleanup func()) {
 	r := &blockingReader{ch: make(chan struct{})}
 	return r, func() { close(r.ch) }
 }

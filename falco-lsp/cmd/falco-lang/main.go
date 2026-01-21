@@ -21,14 +21,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 
 	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/formatter"
 	"github.com/c2ndev/falco-lsp/internal/lsp"
 	"github.com/c2ndev/falco-lsp/internal/parser"
 	"github.com/c2ndev/falco-lsp/internal/version"
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -39,9 +41,6 @@ const (
 	// Severity levels.
 	severityError   = "error"
 	severityWarning = "warning"
-
-	// File permissions.
-	filePermissions = 0o600
 )
 
 func main() {
@@ -104,39 +103,9 @@ type DiagnosticOutput struct {
 }
 
 func runValidate(files []string, format string, strict bool) error {
-	// Expand glob patterns and directories
-	expandedFiles := []string{}
-	for _, pattern := range files {
-		// Check if it's a directory
-		info, err := os.Stat(pattern)
-		if err == nil && info.IsDir() {
-			// Walk directory and find all .yaml and .yml files
-			err := filepath.Walk(pattern, func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-				if !info.IsDir() && (filepath.Ext(path) == extYAML || filepath.Ext(path) == extYML) {
-					expandedFiles = append(expandedFiles, path)
-				}
-				return nil
-			})
-			if err != nil {
-				return fmt.Errorf("failed to walk directory %s: %w", pattern, err)
-			}
-			continue
-		}
-
-		// Try as glob pattern
-		matches, err := filepath.Glob(pattern)
-		if err != nil {
-			return fmt.Errorf("invalid pattern %s: %w", pattern, err)
-		}
-		if len(matches) == 0 {
-			// Treat as literal file
-			expandedFiles = append(expandedFiles, pattern)
-		} else {
-			expandedFiles = append(expandedFiles, matches...)
-		}
+	expandedFiles, err := expandPatterns(files)
+	if err != nil {
+		return fmt.Errorf("error expanding patterns: %w", err)
 	}
 
 	if len(expandedFiles) == 0 {
@@ -261,6 +230,7 @@ func outputText(results []ValidationResult, totalErrors, totalWarnings int, stri
 	yellow := color.New(color.FgYellow).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
 	cyan := color.New(color.FgCyan).SprintFunc()
+	dim := color.New(color.Faint).SprintFunc()
 
 	for _, result := range results {
 		if result.Valid && len(result.Diagnostics) == 0 {
@@ -275,18 +245,25 @@ func outputText(results []ValidationResult, totalErrors, totalWarnings int, stri
 		}
 
 		for _, d := range result.Diagnostics {
-			loc := ""
+			// VSCode terminal auto-detects filepath:line:column pattern and makes it clickable
+			// Show location in a compact format on its own line for better readability
+			var locLink string
 			if d.Line > 0 {
-				loc = fmt.Sprintf("%d:%d", d.Line, d.Column)
+				locLink = fmt.Sprintf("%s:%d:%d", result.File, d.Line, d.Column)
+			} else {
+				locLink = result.File
 			}
 
 			switch d.Severity {
 			case "error":
-				fmt.Printf("  %s %s %s\n", cyan(loc), red("error:"), d.Message)
+				fmt.Printf("    %s\n", cyan(locLink))
+				fmt.Printf("    %s %s\n\n", red("error:"), d.Message)
 			case "warning":
-				fmt.Printf("  %s %s %s\n", cyan(loc), yellow("warning:"), d.Message)
+				fmt.Printf("    %s\n", cyan(locLink))
+				fmt.Printf("    %s %s\n\n", yellow("warning:"), d.Message)
 			default:
-				fmt.Printf("  %s %s %s\n", cyan(loc), d.Severity+":", d.Message)
+				fmt.Printf("    %s\n", cyan(locLink))
+				fmt.Printf("    %s %s\n\n", dim(d.Severity+":"), d.Message)
 			}
 		}
 	}
@@ -362,6 +339,14 @@ func runFormat(patterns []string, write, check, showDiff bool, tabSize int) erro
 	errorCount := 0
 
 	for _, file := range files {
+		// Get file info to preserve permissions
+		fileInfo, err := os.Stat(file)
+		if err != nil {
+			color.Red("Error stat %s: %v", file, err)
+			errorCount++
+			continue
+		}
+
 		// #nosec G304 - file paths are validated by expandPatterns
 		content, err := os.ReadFile(file)
 		if err != nil {
@@ -388,7 +373,9 @@ func runFormat(patterns []string, write, check, showDiff bool, tabSize int) erro
 
 		if write {
 			if !isFormatted {
-				if err := os.WriteFile(file, []byte(formatted), filePermissions); err != nil {
+				// Preserve original file permissions
+				perm := fileInfo.Mode().Perm()
+				if err := os.WriteFile(file, []byte(formatted), perm); err != nil {
 					color.Red("Error writing %s: %v", file, err)
 					errorCount++
 					continue
@@ -416,15 +403,12 @@ func runFormat(patterns []string, write, check, showDiff bool, tabSize int) erro
 func printDiff(original, formatted, filename string) {
 	fmt.Printf("\n--- %s (original)\n+++ %s (formatted)\n", filename, filename)
 
-	origLines := splitLines(original)
-	fmtLines := splitLines(formatted)
+	origLines := strings.Split(original, "\n")
+	fmtLines := strings.Split(formatted, "\n")
 
-	maxLen := len(origLines)
-	if len(fmtLines) > maxLen {
-		maxLen = len(fmtLines)
-	}
+	maxLen := max(len(origLines), len(fmtLines))
 
-	for i := 0; i < maxLen; i++ {
+	for i := range maxLen {
 		origLine := ""
 		fmtLine := ""
 		if i < len(origLines) {
@@ -444,22 +428,6 @@ func printDiff(original, formatted, filename string) {
 		}
 	}
 	fmt.Println()
-}
-
-// splitLines splits content into lines.
-func splitLines(content string) []string {
-	var lines []string
-	start := 0
-	for i := 0; i < len(content); i++ {
-		if content[i] == '\n' {
-			lines = append(lines, content[start:i])
-			start = i + 1
-		}
-	}
-	if start < len(content) {
-		lines = append(lines, content[start:])
-	}
-	return lines
 }
 
 // expandPatterns expands file patterns (globs, directories) to a list of files.
@@ -526,14 +494,23 @@ func expandPatterns(patterns []string) ([]string, error) {
 }
 
 // isFalcoFile returns true if the file is a Falco rules file.
+// Falco file extension constants for isFalcoFile.
+const (
+	extFalcoYAML = ".falco.yaml"
+	extFalcoYML  = ".falco.yml"
+)
+
 func isFalcoFile(path string) bool {
 	ext := filepath.Ext(path)
 	base := filepath.Base(path)
 
 	// Check common Falco extensions
-	if ext == ".yaml" || ext == ".yml" {
+	if ext == extYAML || ext == extYML {
 		// Check if it's a .falco.yaml or .falco.yml
-		if len(base) > 11 && (base[len(base)-11:] == ".falco.yaml" || base[len(base)-10:] == ".falco.yml") {
+		if len(base) > len(extFalcoYAML) && base[len(base)-len(extFalcoYAML):] == extFalcoYAML {
+			return true
+		}
+		if len(base) > len(extFalcoYML) && base[len(base)-len(extFalcoYML):] == extFalcoYML {
 			return true
 		}
 		// Also accept any .yaml/.yml file (user might have different naming)

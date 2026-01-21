@@ -33,7 +33,39 @@ const (
 
 	// DefaultTabSize is the default indentation size.
 	DefaultTabSize = 2
+
+	// DefaultLogLevel is the default logging level.
+	DefaultLogLevel = "info"
 )
+
+// List preview limits for different contexts.
+// These are intentionally different: symbols need compact display, hover shows more detail.
+const (
+	// ListPreviewItemsSymbol is the max items to show in symbol outline/detail.
+	ListPreviewItemsSymbol = 3
+
+	// ListPreviewItemsHover is the max items to show in hover tooltip.
+	ListPreviewItemsHover = 10
+
+	// ListPreviewItemsCompletion is the max items to show in completion documentation.
+	ListPreviewItemsCompletion = 10
+)
+
+// YAML key offsets - character positions after "- key: " patterns.
+// These are used for calculating symbol positions in location creation.
+const (
+	// OffsetMacroName is the character offset for macro names after "- macro: ".
+	OffsetMacroName = 9
+
+	// OffsetListName is the character offset for list names after "- list: ".
+	OffsetListName = 8
+
+	// OffsetRuleName is the character offset for rule names after "- rule: ".
+	OffsetRuleName = 8
+)
+
+// YAMLListItemPrefix is the prefix for YAML list items.
+const YAMLListItemPrefix = "- "
 
 // Config holds runtime configuration values.
 type Config struct {
@@ -63,7 +95,7 @@ func DefaultConfig() *Config {
 		MaxCompletionItems: DefaultMaxCompletionItems,
 		MaxDiagnostics:     DefaultMaxDiagnostics,
 		TabSize:            DefaultTabSize,
-		LogLevel:           "info",
+		LogLevel:           DefaultLogLevel,
 		LogFile:            "",
 	}
 }

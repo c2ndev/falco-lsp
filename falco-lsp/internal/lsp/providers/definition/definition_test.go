@@ -19,11 +19,12 @@ package definition
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/stretchr/testify/require"
 )
 
 func newTestProvider() (*Provider, *document.Store) {
@@ -47,7 +48,7 @@ func TestNewProvider(t *testing.T) {
 	require.NotNil(t, dp, "New returned nil")
 }
 
-func TestGetDefinition(_ *testing.T) {
+func TestGetDefinition_Macro(t *testing.T) {
 	dp, docs := newTestProvider()
 
 	content := `- macro: is_shell
@@ -77,8 +78,8 @@ func TestGetDefinition(_ *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc, params)
-	// Should find the macro definition
-	_ = location
+	require.NotNil(t, location, "Should find macro definition")
+	require.Equal(t, 0, location.Range.Start.Line, "Macro definition should be on line 0")
 }
 
 func TestGetDefinition_NilDoc(t *testing.T) {
@@ -90,7 +91,7 @@ func TestGetDefinition_NilDoc(t *testing.T) {
 	require.Nil(t, location, "expected nil for nil document")
 }
 
-func TestDefinitionForList(_ *testing.T) {
+func TestDefinitionForList(t *testing.T) {
 	dp, docs := newTestProvider()
 
 	content := `- list: shell_binaries
@@ -119,7 +120,8 @@ func TestDefinitionForList(_ *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc, params)
-	_ = location
+	require.NotNil(t, location, "Should find list definition")
+	require.Equal(t, 0, location.Range.Start.Line, "List definition should be on line 0")
 }
 
 func TestDefinitionNotFound(t *testing.T) {
@@ -140,19 +142,18 @@ func TestDefinitionNotFound(t *testing.T) {
 	}
 	_ = docs.Set(doc)
 
+	analyzeDocument(doc)
+
 	params := protocol.TextDocumentPositionParams{
 		TextDocument: protocol.TextDocumentIdentifier{URI: "test.yaml"},
 		Position:     protocol.Position{Line: 2, Character: 18}, // On "undefined_macro"
 	}
 
 	location := dp.GetDefinition(doc, params)
-	// Should return nil for undefined
-	if location != nil {
-		t.Log("Definition returned for undefined macro - may be expected")
-	}
+	require.Nil(t, location, "Should return nil for undefined symbol")
 }
 
-func TestDefinitionOnField(_ *testing.T) {
+func TestDefinitionOnField(t *testing.T) {
 	dp, docs := newTestProvider()
 
 	content := `- rule: Test
@@ -170,6 +171,8 @@ func TestDefinitionOnField(_ *testing.T) {
 	}
 	_ = docs.Set(doc)
 
+	analyzeDocument(doc)
+
 	params := protocol.TextDocumentPositionParams{
 		TextDocument: protocol.TextDocumentIdentifier{URI: "test.yaml"},
 		Position:     protocol.Position{Line: 2, Character: 14}, // On "evt.type"
@@ -177,7 +180,7 @@ func TestDefinitionOnField(_ *testing.T) {
 
 	location := dp.GetDefinition(doc, params)
 	// Fields don't have definitions in source - should return nil
-	_ = location
+	require.Nil(t, location, "Fields should not have definitions")
 }
 
 func TestDefinitionEmptyContent(t *testing.T) {
@@ -196,23 +199,22 @@ func TestDefinitionEmptyContent(t *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc, params)
-	if location != nil {
-		t.Log("Definition returned for empty content - may be expected")
-	}
+	require.Nil(t, location, "Empty content should return nil")
 }
 
-func TestDefinitionForRule(_ *testing.T) {
+func TestDefinitionForRule(t *testing.T) {
 	dp, docs := newTestProvider()
 
-	content := `- rule: Base Rule
+	// Use single-word rule names that GetWordAtPosition can capture
+	content := `- rule: BaseRule
   desc: Base rule
   condition: evt.type = open
   output: "base"
   priority: INFO
 
-- rule: Derived Rule
+- rule: DerivedRule
   desc: Test
-  condition: Base Rule
+  condition: BaseRule
   output: "derived"
   priority: INFO
 `
@@ -229,12 +231,12 @@ func TestDefinitionForRule(_ *testing.T) {
 
 	params := protocol.TextDocumentPositionParams{
 		TextDocument: protocol.TextDocumentIdentifier{URI: "test.yaml"},
-		Position:     protocol.Position{Line: 8, Character: 14}, // On "Base Rule"
+		Position:     protocol.Position{Line: 8, Character: 14}, // On "BaseRule"
 	}
 
 	location := dp.GetDefinition(doc, params)
-	// Should find the rule definition
-	_ = location
+	require.NotNil(t, location, "Should find rule definition")
+	require.Equal(t, 0, location.Range.Start.Line, "Rule definition should be on line 0")
 }
 
 func TestDefinitionCrossFile(t *testing.T) {
@@ -277,12 +279,8 @@ func TestDefinitionCrossFile(t *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc2, params)
-	// Should find the macro definition in macros.yaml
-	if location != nil {
-		if location.URI != "file://macros.yaml" && location.URI != "macros.yaml" {
-			t.Logf("Expected URI to be macros.yaml, got %s", location.URI)
-		}
-	}
+	require.NotNil(t, location, "Should find cross-file macro definition")
+	require.Contains(t, location.URI, "macros.yaml", "Should point to macros.yaml")
 }
 
 func TestDefinitionEmptyWord(t *testing.T) {
@@ -303,6 +301,8 @@ func TestDefinitionEmptyWord(t *testing.T) {
 	}
 	_ = docs.Set(doc)
 
+	analyzeDocument(doc)
+
 	// Position on whitespace
 	params := protocol.TextDocumentPositionParams{
 		TextDocument: protocol.TextDocumentIdentifier{URI: "test.yaml"},
@@ -310,9 +310,7 @@ func TestDefinitionEmptyWord(t *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc, params)
-	if location != nil {
-		t.Log("Definition returned for whitespace position")
-	}
+	require.Nil(t, location, "Should return nil for whitespace position")
 }
 
 func TestDefinitionNoSymbols(t *testing.T) {
@@ -330,7 +328,7 @@ func TestDefinitionNoSymbols(t *testing.T) {
 		Content: content,
 		Version: 1,
 		Result:  result,
-		// No Symbols set
+		// No Symbols set - don't analyze
 	}
 	_ = docs.Set(doc)
 
@@ -340,8 +338,5 @@ func TestDefinitionNoSymbols(t *testing.T) {
 	}
 
 	location := dp.GetDefinition(doc, params)
-	// Should return nil since no symbols are defined
-	if location != nil {
-		t.Log("Definition returned without symbols")
-	}
+	require.Nil(t, location, "Should return nil when no symbols defined")
 }

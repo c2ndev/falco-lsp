@@ -119,3 +119,15 @@ var OverrideableProperties = []PropertyInfo{
 	{PropExceptions, "Override rule exceptions", false, []string{"override"}},
 	{PropSource, "Override rule source", false, []string{"override"}},
 }
+
+// Plugin version property constants.
+const (
+	PropPluginName    PropertyName = "name"
+	PropPluginVersion PropertyName = "version"
+)
+
+// PluginVersionProperties returns properties for plugin version blocks.
+var PluginVersionProperties = []PropertyInfo{
+	{PropPluginName, "Plugin name", true, []string{"plugin_version"}},
+	{PropPluginVersion, "Plugin version", true, []string{"plugin_version"}},
+}

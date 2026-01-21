@@ -4,6 +4,10 @@ run:
   timeout: 10m
 
 formatters:
+  enable:
+    - gci
+    - gofmt
+    - goimports
   settings:
     gci:
       sections:
@@ -76,21 +80,17 @@ linters:
     # - gochecknoglobals
     # - gochecknoinits
     # - gocognit
-    - gci
     - goconst
     - gocritic
     - gocyclo
     - godot
     # - godox
     # - goerr113
-    - gofmt
     - goheader
-    - goimports
     - gomodguard
     # - gomnd
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - lll
@@ -103,10 +103,8 @@ linters:
     # - prealloc
     - revive
     - rowserrcheck
-    - staticcheck
-    - stylecheck
+    - staticcheck # In v2, staticcheck includes gosimple and stylecheck
     # - testpackage
-    - typecheck
     - unconvert
     - unparam
     - unused
@@ -133,6 +131,13 @@ linters:
         linters:
           - gosec
           - lll
+          - goconst
+
+      # Allow utils package name (common Go pattern)
+      - path: internal/utils/
+        linters:
+          - revive
+        text: "var-naming: avoid meaningless package names"
 
 issues:
   #fix: true

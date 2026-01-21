@@ -21,6 +21,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/c2ndev/falco-lsp/internal/lsp/document"
+	"github.com/c2ndev/falco-lsp/internal/parser"
 )
 
 func TestNewTestEnv(t *testing.T) {
@@ -120,4 +123,52 @@ func TestFixtures(t *testing.T) {
 			assert.NotNil(t, doc.Result, "fixture %s failed to parse", name)
 		})
 	}
+}
+
+func TestAssertNil(t *testing.T) {
+	// Use a nil interface value
+	var nilValue any
+	AssertNil(t, nilValue, "nil interface")
+}
+
+func TestAnalyzeDocument_NilDoc(_ *testing.T) {
+	// Should handle nil document gracefully
+	AnalyzeDocument(nil)
+}
+
+func TestAnalyzeDocument_NilResult(t *testing.T) {
+	// Should handle nil result gracefully
+	doc := &document.Document{
+		URI:     "test.yaml",
+		Content: "content",
+		Version: 1,
+		Result:  nil,
+	}
+	AnalyzeDocument(doc)
+	assert.Nil(t, doc.Symbols, "Symbols should remain nil")
+}
+
+func TestAnalyzeDocument_NilParseDocument(t *testing.T) {
+	// Should handle nil parse document gracefully
+	doc := &document.Document{
+		URI:     "test.yaml",
+		Content: "content",
+		Version: 1,
+		Result: &parser.ParseResult{
+			Document: nil,
+		},
+	}
+	AnalyzeDocument(doc)
+	assert.Nil(t, doc.Symbols, "Symbols should remain nil")
+}
+
+func TestAddDocument_WithSymbols(t *testing.T) {
+	env := NewTestEnv()
+
+	doc := env.AddDocument(t, "test.yaml", ListMacroRuleContent)
+
+	require.NotNil(t, doc.Symbols, "Symbols should be populated")
+	assert.NotNil(t, doc.Symbols.Lists["shell_binaries"], "List not found")
+	assert.NotNil(t, doc.Symbols.Macros["is_shell"], "Macro not found")
+	assert.NotNil(t, doc.Symbols.Rules["Shell Spawn"], "Rule not found")
 }

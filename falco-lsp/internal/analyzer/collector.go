@@ -62,16 +62,16 @@ func (a *Analyzer) collectSymbols(doc *parser.Document) {
 	for _, item := range doc.Items {
 		switch it := item.(type) {
 		case parser.Macro:
-			a.collectMacro(it)
+			a.collectMacro(&it)
 		case parser.List:
-			a.collectList(it)
+			a.collectList(&it)
 		case parser.Rule:
 			a.collectRule(&it)
 		}
 	}
 }
 
-func (a *Analyzer) collectMacro(m parser.Macro) {
+func (a *Analyzer) collectMacro(m *parser.Macro) {
 	existsFile := ""
 	if existing, ok := a.symbols.Macros[m.Name]; ok {
 		existsFile = existing.File
@@ -97,7 +97,7 @@ func (a *Analyzer) collectMacro(m parser.Macro) {
 	}
 }
 
-func (a *Analyzer) collectList(l parser.List) {
+func (a *Analyzer) collectList(l *parser.List) {
 	existsFile := ""
 	if existing, ok := a.symbols.Lists[l.Name]; ok {
 		existsFile = existing.File

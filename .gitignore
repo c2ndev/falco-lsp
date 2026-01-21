@@ -8,16 +8,22 @@ coverage/
 .vscode-test/
 *.vsix
 instructions/
+CLAUDE.md
+.claude/
 
 # Go build artifacts
 falco-lsp/bin/
 falco-lsp/build/
 falco-lsp/falco-lang
-falco-lsp/coverage.out
+falco-lsp/*coverage.out
+bin/
 *.exe
 *.dll
 *.so
 *.dylib
+
+# VSCode extension binaries
+vscode-extension/bin/
 
 # IDE
 .idea/

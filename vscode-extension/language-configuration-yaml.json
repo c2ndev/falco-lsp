@@ -35,6 +35,12 @@
   },
   "onEnterRules": [
     {
+      "beforeText": "^\\s*-\\s*(rule|macro|list):\\s*.+$",
+      "action": {
+        "indent": "indent"
+      }
+    },
+    {
       "beforeText": "^\\s*-\\s*(rule|macro|list|items):\\s*$",
       "action": {
         "indent": "indent"

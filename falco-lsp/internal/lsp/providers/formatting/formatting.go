@@ -18,9 +18,11 @@ package formatting
 import (
 	"strings"
 
+	"github.com/c2ndev/falco-lsp/internal/config"
 	"github.com/c2ndev/falco-lsp/internal/formatter"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
+	"github.com/c2ndev/falco-lsp/internal/schema"
 )
 
 // Provider handles document formatting requests.
@@ -32,7 +34,7 @@ type Provider struct {
 // New creates a new formatting provider.
 func New(docs *document.Store, defaultTabSize int) *Provider {
 	if defaultTabSize <= 0 {
-		defaultTabSize = 2 // default
+		defaultTabSize = config.DefaultTabSize
 	}
 	return &Provider{
 		documents:      docs,
@@ -127,21 +129,31 @@ func (p *Provider) formatLine(line, indent string, options protocol.FormattingOp
 	}
 }
 
+// propertyPrefixes contains property name prefixes for line type detection.
+// Derived from schema.PropertyName constants with ":" suffix.
+var propertyPrefixes = []string{
+	schema.PropCondition.String() + ":",
+	schema.PropDesc.String() + ":",
+	schema.PropOutput.String() + ":",
+	schema.PropPriority.String() + ":",
+	schema.PropSource.String() + ":",
+	schema.PropEnabled.String() + ":",
+	schema.PropTags.String() + ":",
+	schema.PropAppend.String() + ":",
+	schema.PropOverride.String() + ":",
+	schema.PropItems.String() + ":",
+	schema.PropExceptions.String() + ":",
+	schema.PropWarnEvttypes.String() + ":",
+	schema.PropSkipIfUnknown.String() + ":",
+}
+
 // isPropertyLine returns true if the line is a property definition.
 func (p *Provider) isPropertyLine(line string) bool {
-	// Common Falco properties
-	properties := []string{
-		"condition:", "desc:", "output:", "priority:", "source:",
-		"enabled:", "tags:", "append:", "override:", "items:",
-		"exceptions:", "warn_evttypes:", "skip-if-unknown-filter:",
-	}
-
-	for _, prop := range properties {
+	for _, prop := range propertyPrefixes {
 		if strings.HasPrefix(line, prop) {
 			return true
 		}
 	}
-
 	return false
 }
 
@@ -165,10 +177,11 @@ func (p *Provider) FormatRange(
 		endLine = len(lines) - 1
 	}
 
-	indent := "  "
-	if params.Options.TabSize > 0 && params.Options.InsertSpaces {
-		indent = strings.Repeat(" ", params.Options.TabSize)
+	tabSize := p.defaultTabSize
+	if params.Options.TabSize > 0 {
+		tabSize = params.Options.TabSize
 	}
+	indent := strings.Repeat(" ", tabSize)
 
 	var edits []protocol.TextEdit
 	for i := startLine; i <= endLine; i++ {

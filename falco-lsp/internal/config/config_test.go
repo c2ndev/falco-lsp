@@ -16,7 +16,6 @@
 package config
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,21 +32,13 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestFromEnvironment(t *testing.T) {
-	// Set environment variables
-	os.Setenv("FALCO_LSP_MAX_CONTENT_LENGTH", "5000000")
-	os.Setenv("FALCO_LSP_MAX_COMPLETION_ITEMS", "50")
-	os.Setenv("FALCO_LSP_MAX_DIAGNOSTICS", "500")
-	os.Setenv("FALCO_LSP_TAB_SIZE", "4")
-	os.Setenv("FALCO_LSP_LOG_LEVEL", "debug")
-	os.Setenv("FALCO_LSP_LOG_FILE", "/tmp/test.log")
-	defer func() {
-		os.Unsetenv("FALCO_LSP_MAX_CONTENT_LENGTH")
-		os.Unsetenv("FALCO_LSP_MAX_COMPLETION_ITEMS")
-		os.Unsetenv("FALCO_LSP_MAX_DIAGNOSTICS")
-		os.Unsetenv("FALCO_LSP_TAB_SIZE")
-		os.Unsetenv("FALCO_LSP_LOG_LEVEL")
-		os.Unsetenv("FALCO_LSP_LOG_FILE")
-	}()
+	// Set environment variables using t.Setenv (auto-cleanup)
+	t.Setenv("FALCO_LSP_MAX_CONTENT_LENGTH", "5000000")
+	t.Setenv("FALCO_LSP_MAX_COMPLETION_ITEMS", "50")
+	t.Setenv("FALCO_LSP_MAX_DIAGNOSTICS", "500")
+	t.Setenv("FALCO_LSP_TAB_SIZE", "4")
+	t.Setenv("FALCO_LSP_LOG_LEVEL", "debug")
+	t.Setenv("FALCO_LSP_LOG_FILE", "/tmp/test.log")
 
 	cfg := FromEnvironment()
 
@@ -60,13 +51,9 @@ func TestFromEnvironment(t *testing.T) {
 }
 
 func TestFromEnvironmentInvalidValues(t *testing.T) {
-	// Set invalid values
-	os.Setenv("FALCO_LSP_MAX_CONTENT_LENGTH", "invalid")
-	os.Setenv("FALCO_LSP_TAB_SIZE", "-1")
-	defer func() {
-		os.Unsetenv("FALCO_LSP_MAX_CONTENT_LENGTH")
-		os.Unsetenv("FALCO_LSP_TAB_SIZE")
-	}()
+	// Set invalid values using t.Setenv (auto-cleanup)
+	t.Setenv("FALCO_LSP_MAX_CONTENT_LENGTH", "invalid")
+	t.Setenv("FALCO_LSP_TAB_SIZE", "-1")
 
 	cfg := FromEnvironment()
 

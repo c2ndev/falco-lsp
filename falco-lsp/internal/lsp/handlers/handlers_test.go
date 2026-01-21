@@ -19,11 +19,12 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/c2ndev/falco-lsp/internal/lsp/router"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func newTestHandlers() *Handlers {
@@ -505,4 +506,292 @@ func TestHandlers_DocumentNotFound(t *testing.T) {
 	require.NotNil(t, response, "expected response")
 	// Should return empty result, not error
 	assert.Nil(t, response.Error, "unexpected error for non-existent document")
+}
+
+func TestHandlers_HandleDidChangeWatchedFiles(t *testing.T) {
+	h := newTestHandlers()
+
+	// First open a document
+	openParams := protocol.DidOpenTextDocumentParams{
+		TextDocument: protocol.TextDocumentItem{
+			URI:     "file:///test.yaml",
+			Version: 1,
+			Text:    "- rule: Test\n",
+		},
+	}
+	openBytes, _ := json.Marshal(openParams)
+	h.HandleDidOpen(&protocol.Message{Params: openBytes})
+
+	// Verify document exists
+	_, ok := h.documents.Get("file:///test.yaml")
+	require.True(t, ok, "document should exist after open")
+
+	// Simulate file deletion
+	watchedParams := protocol.DidChangeWatchedFilesParams{
+		Changes: []protocol.FileEvent{
+			{
+				URI:  "file:///test.yaml",
+				Type: protocol.FileChangeTypeDeleted,
+			},
+		},
+	}
+	watchedBytes, _ := json.Marshal(watchedParams)
+
+	h.HandleDidChangeWatchedFiles(&protocol.Message{Params: watchedBytes})
+
+	// Document should be removed
+	_, ok = h.documents.Get("file:///test.yaml")
+	assert.False(t, ok, "document should be removed after file deletion")
+}
+
+func TestHandlers_HandleDidChangeWatchedFiles_InvalidParams(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Should not panic on invalid params
+	h.HandleDidChangeWatchedFiles(&protocol.Message{Params: []byte(`invalid`)})
+}
+
+func TestHandlers_HandleDidChangeWatchedFiles_NonDeletedFile(t *testing.T) {
+	h := newTestHandlers()
+
+	// First open a document
+	openParams := protocol.DidOpenTextDocumentParams{
+		TextDocument: protocol.TextDocumentItem{
+			URI:     "file:///test.yaml",
+			Version: 1,
+			Text:    "- rule: Test\n",
+		},
+	}
+	openBytes, _ := json.Marshal(openParams)
+	h.HandleDidOpen(&protocol.Message{Params: openBytes})
+
+	// Simulate file change (not deletion)
+	watchedParams := protocol.DidChangeWatchedFilesParams{
+		Changes: []protocol.FileEvent{
+			{
+				URI:  "file:///test.yaml",
+				Type: protocol.FileChangeTypeChanged,
+			},
+		},
+	}
+	watchedBytes, _ := json.Marshal(watchedParams)
+
+	h.HandleDidChangeWatchedFiles(&protocol.Message{Params: watchedBytes})
+
+	// Document should still exist (only deletion removes it)
+	_, ok := h.documents.Get("file:///test.yaml")
+	assert.True(t, ok, "document should still exist after file change")
+}
+
+func TestHandlers_HandleDidOpen_InvalidParams(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Should not panic on invalid params
+	h.HandleDidOpen(&protocol.Message{Params: []byte(`invalid`)})
+}
+
+func TestHandlers_HandleDidOpen_InvalidURI(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Open with invalid URI (contains null byte)
+	params := protocol.DidOpenTextDocumentParams{
+		TextDocument: protocol.TextDocumentItem{
+			URI:     "file:///test\x00.yaml",
+			Version: 1,
+			Text:    "- rule: Test\n",
+		},
+	}
+	paramsBytes, _ := json.Marshal(params)
+
+	// Should not panic
+	h.HandleDidOpen(&protocol.Message{Params: paramsBytes})
+}
+
+func TestHandlers_HandleDidChange_InvalidParams(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Should not panic on invalid params
+	h.HandleDidChange(&protocol.Message{Params: []byte(`invalid`)})
+}
+
+func TestHandlers_HandleDidChange_NewDocument(t *testing.T) {
+	h := newTestHandlers()
+
+	// Change a document that doesn't exist yet (should create it)
+	changeParams := protocol.DidChangeTextDocumentParams{
+		TextDocument: protocol.VersionedTextDocumentIdentifier{
+			URI:     "file:///new.yaml",
+			Version: 1,
+		},
+		ContentChanges: []protocol.TextDocumentContentChangeEvent{
+			{Text: "- rule: New\n"},
+		},
+	}
+	changeBytes, _ := json.Marshal(changeParams)
+
+	h.HandleDidChange(&protocol.Message{Params: changeBytes})
+
+	// Document should be created
+	doc, ok := h.documents.Get("file:///new.yaml")
+	assert.True(t, ok, "document should be created")
+	assert.Equal(t, "- rule: New\n", doc.Content, "content should match")
+}
+
+func TestHandlers_HandleDidChange_InvalidURI(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Change with invalid URI
+	changeParams := protocol.DidChangeTextDocumentParams{
+		TextDocument: protocol.VersionedTextDocumentIdentifier{
+			URI:     "file:///test\x00.yaml",
+			Version: 1,
+		},
+		ContentChanges: []protocol.TextDocumentContentChangeEvent{
+			{Text: "- rule: Test\n"},
+		},
+	}
+	changeBytes, _ := json.Marshal(changeParams)
+
+	// Should not panic
+	h.HandleDidChange(&protocol.Message{Params: changeBytes})
+}
+
+func TestHandlers_HandleDidClose_InvalidParams(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Should not panic on invalid params
+	h.HandleDidClose(&protocol.Message{Params: []byte(`invalid`)})
+}
+
+func TestHandlers_GetProviders(t *testing.T) {
+	h := newTestHandlers()
+
+	// Test all getter methods
+	assert.NotNil(t, h.GetDocuments(), "GetDocuments should return non-nil")
+	assert.NotNil(t, h.GetCompletion(), "GetCompletion should return non-nil")
+	assert.NotNil(t, h.GetHover(), "GetHover should return non-nil")
+	assert.NotNil(t, h.GetDefinition(), "GetDefinition should return non-nil")
+	assert.NotNil(t, h.GetSymbols(), "GetSymbols should return non-nil")
+	assert.NotNil(t, h.GetReferences(), "GetReferences should return non-nil")
+	assert.NotNil(t, h.GetFormatting(), "GetFormatting should return non-nil")
+}
+
+func TestHandlers_HandleHover_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request hover for non-existent document
+	hoverParams := protocol.TextDocumentPositionParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+		Position:     protocol.Position{Line: 0, Character: 0},
+	}
+	hoverBytes, _ := json.Marshal(hoverParams)
+
+	response := h.HandleHover(&protocol.Message{ID: 1, Params: hoverBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleDefinition_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request definition for non-existent document
+	defParams := protocol.TextDocumentPositionParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+		Position:     protocol.Position{Line: 0, Character: 0},
+	}
+	defBytes, _ := json.Marshal(defParams)
+
+	response := h.HandleDefinition(&protocol.Message{ID: 1, Params: defBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleReferences_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request references for non-existent document
+	refParams := protocol.ReferenceParams{
+		TextDocumentPositionParams: protocol.TextDocumentPositionParams{
+			TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+			Position:     protocol.Position{Line: 0, Character: 0},
+		},
+	}
+	refBytes, _ := json.Marshal(refParams)
+
+	response := h.HandleReferences(&protocol.Message{ID: 1, Params: refBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleDocumentSymbol_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request symbols for non-existent document
+	symParams := protocol.DocumentSymbolParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+	}
+	symBytes, _ := json.Marshal(symParams)
+
+	response := h.HandleDocumentSymbol(&protocol.Message{ID: 1, Params: symBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleFormatting_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request formatting for non-existent document
+	fmtParams := protocol.DocumentFormattingParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+		Options: protocol.FormattingOptions{
+			TabSize:      2,
+			InsertSpaces: true,
+		},
+	}
+	fmtBytes, _ := json.Marshal(fmtParams)
+
+	response := h.HandleFormatting(&protocol.Message{ID: 1, Params: fmtBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleRangeFormatting_DocumentNotFound(t *testing.T) {
+	h := newTestHandlers()
+
+	// Request range formatting for non-existent document
+	fmtParams := protocol.DocumentRangeFormattingParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+		Range: protocol.Range{
+			Start: protocol.Position{Line: 0, Character: 0},
+			End:   protocol.Position{Line: 1, Character: 0},
+		},
+		Options: protocol.FormattingOptions{
+			TabSize:      2,
+			InsertSpaces: true,
+		},
+	}
+	fmtBytes, _ := json.Marshal(fmtParams)
+
+	response := h.HandleRangeFormatting(&protocol.Message{ID: 1, Params: fmtBytes})
+
+	require.NotNil(t, response, "expected response")
+	assert.Nil(t, response.Error, "unexpected error")
+}
+
+func TestHandlers_HandleDidSave_DocumentNotFound(_ *testing.T) {
+	h := newTestHandlers()
+
+	// Save a document that doesn't exist
+	saveParams := protocol.DidSaveTextDocumentParams{
+		TextDocument: protocol.TextDocumentIdentifier{URI: "file:///nonexistent.yaml"},
+	}
+	saveBytes, _ := json.Marshal(saveParams)
+
+	// Should not panic
+	h.HandleDidSave(&protocol.Message{Params: saveBytes})
 }

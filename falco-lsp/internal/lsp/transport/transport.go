@@ -26,12 +26,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/c2ndev/falco-lsp/internal/config"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 )
 
-// maxContentLength is the maximum allowed message size (10MB).
-// This prevents OOM attacks from malicious Content-Length headers.
-const maxContentLength = 10 * 1024 * 1024
+// maxContentLength is the maximum allowed message size.
+// Uses the centralized constant from config to avoid duplication.
+const maxContentLength = config.DefaultMaxContentLength
 
 // DefaultReadTimeout is the default timeout for reading a message.
 const DefaultReadTimeout = 30 * time.Second
@@ -62,12 +63,10 @@ func DefaultConfig() Config {
 
 // Transport handles reading and writing LSP messages.
 type Transport struct {
-	reader  *bufio.Reader
-	writer  io.Writer
-	mu      sync.Mutex
-	config  Config
-	msgChan chan *protocol.Message
-	errChan chan error
+	reader *bufio.Reader
+	writer io.Writer
+	mu     sync.Mutex
+	config Config
 }
 
 // New creates a new Transport with the given reader and writer.
@@ -87,11 +86,9 @@ func NewWithConfig(reader io.Reader, writer io.Writer, cfg Config) *Transport {
 		cfg.WriteTimeout = DefaultWriteTimeout
 	}
 	return &Transport{
-		reader:  bufio.NewReader(reader),
-		writer:  writer,
-		config:  cfg,
-		msgChan: make(chan *protocol.Message),
-		errChan: make(chan error),
+		reader: bufio.NewReader(reader),
+		writer: writer,
+		config: cfg,
 	}
 }
 
@@ -102,7 +99,7 @@ func (t *Transport) ReadMessage() (*protocol.Message, error) {
 }
 
 // ReadMessageWithContext reads a JSON-RPC message with context support.
-// Returns an error if the context is cancelled or times out.
+// Returns an error if the context is canceled or times out.
 func (t *Transport) ReadMessageWithContext(ctx context.Context) (*protocol.Message, error) {
 	// Create a channel for the result
 	type result struct {

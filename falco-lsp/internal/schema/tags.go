@@ -19,7 +19,7 @@ package schema
 type TagInfo struct {
 	Name        string
 	Description string
-	Category    string // "category", "mitre-technique", "mitre-tactic"
+	Category    string // "category", "miter-technique", "miter-tactic"
 }
 
 // CategoryTags contains common categorization tags.
@@ -33,33 +33,33 @@ var CategoryTags = []TagInfo{
 	{"compliance", "Compliance requirement", "category"},
 }
 
-// MITRETechniqueTags contains MITRE ATT&CK technique tags.
+// MITRETechniqueTags contains MITER ATT&CK technique tags.
 var MITRETechniqueTags = []TagInfo{
-	{"T1059", "MITRE: Command and Scripting Interpreter", "mitre-technique"},
-	{"T1068", "MITRE: Exploitation for Privilege Escalation", "mitre-technique"},
-	{"T1078", "MITRE: Valid Accounts", "mitre-technique"},
-	{"T1105", "MITRE: Ingress Tool Transfer", "mitre-technique"},
-	{"T1190", "MITRE: Exploit Public-Facing Application", "mitre-technique"},
-	{"T1210", "MITRE: Exploitation of Remote Services", "mitre-technique"},
-	{"T1548", "MITRE: Abuse Elevation Control Mechanism", "mitre-technique"},
-	{"T1611", "MITRE: Escape to Host", "mitre-technique"},
+	{"T1059", "MITER: Command and Scripting Interpreter", "miter-technique"},
+	{"T1068", "MITER: Exploitation for Privilege Escalation", "miter-technique"},
+	{"T1078", "MITER: Valid Accounts", "miter-technique"},
+	{"T1105", "MITER: Ingress Tool Transfer", "miter-technique"},
+	{"T1190", "MITER: Exploit Public-Facing Application", "miter-technique"},
+	{"T1210", "MITER: Exploitation of Remote Services", "miter-technique"},
+	{"T1548", "MITER: Abuse Elevation Control Mechanism", "miter-technique"},
+	{"T1611", "MITER: Escape to Host", "miter-technique"},
 }
 
-// MITRETacticTags contains MITRE ATT&CK tactic tags.
+// MITRETacticTags contains MITER ATT&CK tactic tags.
 var MITRETacticTags = []TagInfo{
-	{"mitre_execution", "MITRE Execution tactic", "mitre-tactic"},
-	{"mitre_persistence", "MITRE Persistence tactic", "mitre-tactic"},
-	{"mitre_privilege_escalation", "MITRE Privilege Escalation tactic", "mitre-tactic"},
-	{"mitre_defense_evasion", "MITRE Defense Evasion tactic", "mitre-tactic"},
-	{"mitre_credential_access", "MITRE Credential Access tactic", "mitre-tactic"},
-	{"mitre_discovery", "MITRE Discovery tactic", "mitre-tactic"},
-	{"mitre_lateral_movement", "MITRE Lateral Movement tactic", "mitre-tactic"},
-	{"mitre_collection", "MITRE Collection tactic", "mitre-tactic"},
-	{"mitre_exfiltration", "MITRE Exfiltration tactic", "mitre-tactic"},
-	{"mitre_impact", "MITRE Impact tactic", "mitre-tactic"},
+	{"miter_execution", "MITER Execution tactic", "miter-tactic"},
+	{"miter_persistence", "MITER Persistence tactic", "miter-tactic"},
+	{"miter_privilege_escalation", "MITER Privilege Escalation tactic", "miter-tactic"},
+	{"miter_defense_evasion", "MITER Defense Evasion tactic", "miter-tactic"},
+	{"miter_credential_access", "MITER Credential Access tactic", "miter-tactic"},
+	{"miter_discovery", "MITER Discovery tactic", "miter-tactic"},
+	{"miter_lateral_movement", "MITER Lateral Movement tactic", "miter-tactic"},
+	{"miter_collection", "MITER Collection tactic", "miter-tactic"},
+	{"miter_exfiltration", "MITER Exfiltration tactic", "miter-tactic"},
+	{"miter_impact", "MITER Impact tactic", "miter-tactic"},
 }
 
-// AllTags returns all tags (categories + MITRE techniques + MITRE tactics).
+// AllTags returns all tags (categories + MITER techniques + MITER tactics).
 func AllTags() []TagInfo {
 	result := make([]TagInfo, 0, len(CategoryTags)+len(MITRETechniqueTags)+len(MITRETacticTags))
 	result = append(result, CategoryTags...)

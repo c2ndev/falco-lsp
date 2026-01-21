@@ -40,21 +40,21 @@ func TestCategoryTagsContainsExpected(t *testing.T) {
 }
 
 func TestMITRETacticTagsExist(t *testing.T) {
-	assert.NotEmpty(t, MITRETacticTags, "Should have MITRE tactic tags")
+	assert.NotEmpty(t, MITRETacticTags, "Should have MITER tactic tags")
 
-	// Check some common MITRE tactics
+	// Check some common MITER tactics
 	tactics := make(map[string]bool)
 	for _, tag := range MITRETacticTags {
 		tactics[tag.Name] = true
 	}
 
-	assert.True(t, tactics["mitre_execution"], "Should contain mitre_execution tactic")
-	assert.True(t, tactics["mitre_persistence"], "Should contain mitre_persistence tactic")
-	assert.True(t, tactics["mitre_privilege_escalation"], "Should contain mitre_privilege_escalation tactic")
+	assert.True(t, tactics["miter_execution"], "Should contain miter_execution tactic")
+	assert.True(t, tactics["miter_persistence"], "Should contain miter_persistence tactic")
+	assert.True(t, tactics["miter_privilege_escalation"], "Should contain miter_privilege_escalation tactic")
 }
 
 func TestMITRETechniqueTagsExist(t *testing.T) {
-	assert.NotEmpty(t, MITRETechniqueTags, "Should have MITRE technique tags")
+	assert.NotEmpty(t, MITRETechniqueTags, "Should have MITER technique tags")
 
 	// Check format of technique tags
 	for _, tag := range MITRETechniqueTags {

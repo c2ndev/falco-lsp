@@ -18,9 +18,10 @@ package condition
 import (
 	"testing"
 
-	"github.com/c2ndev/falco-lsp/internal/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/c2ndev/falco-lsp/internal/ast"
 )
 
 func TestParseSimpleComparison(t *testing.T) {

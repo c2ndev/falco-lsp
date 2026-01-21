@@ -16,6 +16,8 @@
 package analyzer
 
 import (
+	"sort"
+
 	"github.com/c2ndev/falco-lsp/internal/ast"
 	"github.com/c2ndev/falco-lsp/internal/fields"
 	"github.com/c2ndev/falco-lsp/internal/parser"
@@ -102,11 +104,17 @@ type RuleSymbol struct {
 //
 // The analyzer is designed to be used in a single-threaded context per document.
 // The LSP server creates a new Analyzer for each AnalyzeAndPublish call.
+//
+// Usage Pattern:
+//   - Create analyzer with NewAnalyzer()
+//   - Call Analyze() or AnalyzeMultiple() which sets currentFile
+//   - The analyzer is stateful and should not be reused after analysis
+//   - Do not call validation methods directly without setting currentFile
 type Analyzer struct {
 	symbols       *SymbolTable
 	diagnostics   []Diagnostic
 	fieldRegistry *fields.Registry
-	currentFile   string
+	currentFile   string // MUST be set by Analyze() before any validation
 	currentSource string // Current source type (syscall, k8s_audit, etc.)
 }
 
@@ -136,7 +144,10 @@ func (a *Analyzer) Analyze(doc *parser.Document, filename string) *AnalysisResul
 	// First pass: collect all symbol definitions
 	a.collectSymbols(doc)
 
-	// Second pass: validate all conditions and references
+	// Second pass: validate required fields
+	a.validateRequiredFields(doc)
+
+	// Third pass: validate all conditions and references
 	a.validateConditions(doc)
 
 	return &AnalysisResult{
@@ -146,19 +157,33 @@ func (a *Analyzer) Analyze(doc *parser.Document, filename string) *AnalysisResul
 }
 
 // AnalyzeMultiple analyzes multiple documents together.
+// Files are processed in sorted order for deterministic diagnostics output.
 func (a *Analyzer) AnalyzeMultiple(docs map[string]*parser.Document) *AnalysisResult {
 	a.diagnostics = nil
 
+	// Sort filenames for deterministic iteration order
+	filenames := make([]string, 0, len(docs))
+	for filename := range docs {
+		filenames = append(filenames, filename)
+	}
+	sort.Strings(filenames)
+
 	// First pass: collect symbols from all files
-	for filename, doc := range docs {
+	for _, filename := range filenames {
 		a.currentFile = filename
-		a.collectSymbols(doc)
+		a.collectSymbols(docs[filename])
 	}
 
-	// Second pass: validate all conditions and references
-	for filename, doc := range docs {
+	// Second pass: validate required fields
+	for _, filename := range filenames {
 		a.currentFile = filename
-		a.validateConditions(doc)
+		a.validateRequiredFields(docs[filename])
+	}
+
+	// Third pass: validate all conditions and references
+	for _, filename := range filenames {
+		a.currentFile = filename
+		a.validateConditions(docs[filename])
 	}
 
 	return &AnalysisResult{
@@ -167,33 +192,49 @@ func (a *Analyzer) AnalyzeMultiple(docs map[string]*parser.Document) *AnalysisRe
 	}
 }
 
-// adjustRangeForLine adjusts a range to account for the line offset in the file.
-func (a *Analyzer) adjustRangeForLine(r ast.Range, fileLine int) ast.Range {
-	// The range from the condition parser is relative to the condition string (line 1)
+// adjustRangeForLine adjusts a range to account for the line and column offset in the file.
+func (a *Analyzer) adjustRangeForLine(r ast.Range, fileLine, fileCol int) ast.Range {
+	// The range from the condition parser is relative to the condition string (line 1, col 0)
 	// We need to adjust it to be relative to the file
-	// Since the condition is on the same line as "condition:", we use fileLine
+	// fileLine is where the condition value starts (1-based)
+	// fileCol is the column offset where condition value starts (0-based)
+	//
+	// For tokens on the first line of the condition (r.Start.Line == 1),
+	// we add the fileCol offset since they share the line with "condition: "
+	// For tokens on subsequent lines, we don't add fileCol since those lines
+	// start at column 0 in the file (with their own indentation tracked by lexer)
+
+	startCol := r.Start.Column
+	endCol := r.End.Column
+	if r.Start.Line == 1 {
+		startCol = fileCol + r.Start.Column
+	}
+	if r.End.Line == 1 {
+		endCol = fileCol + r.End.Column
+	}
+
 	return ast.Range{
 		Start: ast.Position{
-			Line:   fileLine,
-			Column: r.Start.Column,
+			Line:   fileLine + (r.Start.Line - 1), // r.Start.Line is 1-based
+			Column: startCol,
 			Offset: r.Start.Offset,
 		},
 		End: ast.Position{
-			Line:   fileLine + (r.End.Line - r.Start.Line),
-			Column: r.End.Column,
+			Line:   fileLine + (r.End.Line - 1), // r.End.Line is 1-based
+			Column: endCol,
 			Offset: r.End.Offset,
 		},
 	}
 }
 
 // walkExpression walks an expression and validates all references.
-// The line parameter is used to adjust ranges for proper error positioning.
-func (a *Analyzer) walkExpression(expr ast.Expression, source string, line int) {
-	a.walkExpressionContext(expr, source, false, line)
+// The line and col parameters are used to adjust ranges for proper error positioning.
+func (a *Analyzer) walkExpression(expr ast.Expression, source string, line, col int) {
+	a.walkExpressionContext(expr, source, false, line, col)
 }
 
 // walkExpressionContext walks with context about whether we're in a value position.
-func (a *Analyzer) walkExpressionContext(expr ast.Expression, source string, inValuePosition bool, line int) {
+func (a *Analyzer) walkExpressionContext(expr ast.Expression, source string, inValuePosition bool, line, col int) {
 	if expr == nil {
 		return
 	}
@@ -203,36 +244,43 @@ func (a *Analyzer) walkExpressionContext(expr ast.Expression, source string, inV
 		// For comparison operators (=, contains, etc.): left is field, right is value
 		// For binary logical operators (and, or): both sides are field positions
 		isComparison := node.Operator.IsComparison()
-		a.walkExpressionContext(node.Left, source, false, line)
-		a.walkExpressionContext(node.Right, source, isComparison, line)
+		a.walkExpressionContext(node.Left, source, false, line, col)
+		a.walkExpressionContext(node.Right, source, isComparison, line, col)
 
 	case *ast.UnaryExpr:
-		a.walkExpressionContext(node.Operand, source, inValuePosition, line)
+		a.walkExpressionContext(node.Operand, source, inValuePosition, line, col)
 
 	case *ast.ParenExpr:
-		a.walkExpressionContext(node.Expr, source, inValuePosition, line)
+		a.walkExpressionContext(node.Expr, source, inValuePosition, line, col)
 
 	case *ast.FieldExpr:
 		if !inValuePosition {
-			a.validateField(node, source, line)
+			a.validateField(node, source, line, col)
 		}
 
 	case *ast.MacroRef:
 		if !inValuePosition {
-			a.validateMacroRef(node, line)
+			a.validateMacroRef(node, line, col)
 		}
 
 	case *ast.ListRef:
-		a.validateListRef(node, line)
+		a.validateListRef(node, line, col)
 
 	case *ast.TupleExpr:
 		for _, elem := range node.Elements {
-			a.walkExpressionContext(elem, source, true, line)
+			a.walkExpressionContext(elem, source, true, line, col)
 		}
 	}
 }
 
 func (a *Analyzer) addDiagnostic(severity Severity, message string, r ast.Range, source, code string) {
+	// Safety check: ensure currentFile is set
+	// This should always be set by Analyze() or AnalyzeMultiple() before any validation
+	if a.currentFile == "" {
+		// This indicates a programmer error - using analyzer incorrectly
+		panic("analyzer: currentFile not set - must call Analyze() or AnalyzeMultiple() first")
+	}
+
 	a.diagnostics = append(a.diagnostics, Diagnostic{
 		Severity: severity,
 		Message:  message,

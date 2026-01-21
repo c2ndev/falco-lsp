@@ -55,7 +55,7 @@ func Init(logFile string, level Level) error {
 			return err
 		}
 
-		// #nosec G302 - 0o600 is secure for log files
+		// #nosec G304 - logFile is from trusted configuration, not user input
 		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 		if err != nil {
 			return err

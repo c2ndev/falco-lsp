@@ -19,12 +19,13 @@ package symbols
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func newTestProvider() (*Provider, *document.Store) {

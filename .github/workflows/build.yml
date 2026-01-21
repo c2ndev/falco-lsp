@@ -6,8 +6,6 @@ on:
     paths:
       - "falco-lsp/**"
       - ".github/workflows/build.yml"
-    tags:
-      - "v*"
   pull_request:
     branches: [main, master]
     paths:
@@ -16,27 +14,8 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.os }}-${{ matrix.arch }}
-    runs-on: ${{ matrix.runner }}
-
-    strategy:
-      matrix:
-        include:
-          - os: linux
-            arch: amd64
-            runner: ubuntu-latest
-          - os: linux
-            arch: arm64
-            runner: ubuntu-latest
-          - os: darwin
-            arch: amd64
-            runner: macos-latest
-          - os: darwin
-            arch: arm64
-            runner: macos-latest
-          - os: windows
-            arch: amd64
-            runner: windows-latest
+    name: Build
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -49,44 +28,12 @@ jobs:
           cache: true
           cache-dependency-path: falco-lsp/go.sum
 
-      - name: Build binary
+      - name: Build all platform binaries
         working-directory: ./falco-lsp
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-          CGO_ENABLED: 0
-        run: |
-          mkdir -p ../dist
-          BINARY_NAME=falco-lang
-          if [ "${{ matrix.os }}" = "windows" ]; then
-            BINARY_NAME=falco-lang.exe
-          fi
-          go build -ldflags="-s -w" -o ../dist/${BINARY_NAME}-${{ matrix.os }}-${{ matrix.arch }} ./cmd/falco-lang
-        shell: bash
+        run: make build-all
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: falco-lang-${{ matrix.os }}-${{ matrix.arch }}
-          path: dist/falco-lang-${{ matrix.os }}-${{ matrix.arch }}*
-
-  release:
-    name: Create Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: falco-lang-binaries
+          path: falco-lsp/build/falco-lang-*

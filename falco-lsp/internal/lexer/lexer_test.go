@@ -160,3 +160,65 @@ func TestTokenizeComplexCondition(t *testing.T) {
 // since all operator logic is now centralized in the ast package.
 // The lexer no longer provides wrapper functions - use ast.IsOperator(),
 // ast.IsLogicalOperator(), ast.IsComparisonOperator(), ast.IsUnaryOperator() directly.
+
+func TestTokenizeStringWithEscapeSequences(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"newline", `"hello\nworld"`, "hello\nworld"},
+		{"tab", `"hello\tworld"`, "hello\tworld"},
+		{"carriage return", `"hello\rworld"`, "hello\rworld"},
+		{"backslash", `"hello\\world"`, "hello\\world"},
+		{"double quote", `"hello\"world"`, "hello\"world"},
+		{"single quote in double", `"hello\'world"`, "hello'world"},
+		{"unknown escape", `"hello\xworld"`, "helloxworld"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tokens := Tokenize(tt.input)
+			require.GreaterOrEqual(t, len(tokens), 2)
+			assert.Equal(t, TokenString, tokens[0].Type)
+			assert.Equal(t, tt.expected, tokens[0].Value)
+		})
+	}
+}
+
+func TestTokenizeSingleQuotedStringWithEscapes(t *testing.T) {
+	input := `'hello\nworld'`
+	tokens := Tokenize(input)
+	require.GreaterOrEqual(t, len(tokens), 2)
+	assert.Equal(t, TokenString, tokens[0].Type)
+	assert.Equal(t, "hello\nworld", tokens[0].Value)
+}
+
+func TestTokenTypeString(t *testing.T) {
+	tests := []struct {
+		tokenType TokenType
+		expected  string
+	}{
+		{TokenEOF, "EOF"},
+		{TokenError, "ERROR"},
+		{TokenWord, "WORD"},
+		{TokenNumber, "NUMBER"},
+		{TokenString, "STRING"},
+		{TokenLParen, "LPAREN"},
+		{TokenRParen, "RPAREN"},
+		{TokenLBrack, "LBRACK"},
+		{TokenRBrack, "RBRACK"},
+		{TokenLBrace, "LBRACE"},
+		{TokenRBrace, "RBRACE"},
+		{TokenComma, "COMMA"},
+		{TokenDot, "DOT"},
+		{TokenOperator, "OPERATOR"},
+		{TokenType(999), "UNKNOWN"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.expected, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.tokenType.String())
+		})
+	}
+}

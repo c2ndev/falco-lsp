@@ -193,3 +193,381 @@ func TestParseInvalidYAML(t *testing.T) {
 
 	assert.Error(t, err)
 }
+
+// --- isItem interface tests ---
+
+func TestItem_Interface(_ *testing.T) {
+	// Test that all types implement Item interface
+	var _ Item = Rule{}
+	var _ Item = Macro{}
+	var _ Item = List{}
+	var _ Item = RequiredEngineVersion{}
+	var _ Item = RequiredPluginVersions{}
+
+	// Call isItem to verify interface compliance
+	Rule{}.isItem()
+	Macro{}.isItem()
+	List{}.isItem()
+	RequiredEngineVersion{}.isItem()
+	RequiredPluginVersions{}.isItem()
+}
+
+// --- safeColumnConvert tests ---
+
+func TestSafeColumnConvert(t *testing.T) {
+	tests := []struct {
+		input    int
+		expected int
+	}{
+		{1, 0},  // 1-based to 0-based
+		{10, 9}, // normal conversion
+		{0, 0},  // zero stays zero
+		{-1, 0}, // negative clamped to zero
+		{-100, 0},
+	}
+
+	for _, tt := range tests {
+		result := safeColumnConvert(tt.input)
+		assert.Equal(t, tt.expected, result, "safeColumnConvert(%d)", tt.input)
+	}
+}
+
+// --- Exception parsing tests ---
+
+func TestParseRuleWithExceptions(t *testing.T) {
+	yaml := `
+- rule: Test Rule with Exceptions
+  desc: A rule with exceptions
+  condition: proc.name = bash
+  output: "test output"
+  priority: WARNING
+  exceptions:
+    - name: allowed_users
+      fields: [user.name]
+      comps: ["="]
+      values:
+        - [root]
+        - [admin]
+    - name: allowed_commands
+      fields: [proc.name, proc.args]
+      comps: ["=", "startswith"]
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	require.Len(t, rule.Exceptions, 2)
+
+	// First exception
+	ex1 := rule.Exceptions[0]
+	assert.Equal(t, "allowed_users", ex1.Name)
+	assert.Equal(t, []string{"user.name"}, ex1.Fields)
+	assert.Equal(t, []string{"="}, ex1.Comps)
+	require.Len(t, ex1.Values, 2)
+	assert.Equal(t, []string{"root"}, ex1.Values[0])
+	assert.Equal(t, []string{"admin"}, ex1.Values[1])
+
+	// Second exception
+	ex2 := rule.Exceptions[1]
+	assert.Equal(t, "allowed_commands", ex2.Name)
+	assert.Equal(t, []string{"proc.name", "proc.args"}, ex2.Fields)
+	assert.Equal(t, []string{"=", "startswith"}, ex2.Comps)
+}
+
+func TestParseRuleWithEmptyExceptions(t *testing.T) {
+	yaml := `
+- rule: Test Rule
+  exceptions:
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	// When exceptions is null/empty, parseExceptions returns nil
+	assert.Nil(t, rule.Exceptions)
+}
+
+// --- Required plugin versions tests ---
+
+func TestParseRequiredPluginVersions(t *testing.T) {
+	yaml := `
+- required_plugin_versions:
+    - name: cloudtrail
+      version: 0.6.0
+    - name: json
+      version: 0.4.0
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rpv, ok := result.Document.Items[0].(RequiredPluginVersions)
+	require.True(t, ok)
+	require.Len(t, rpv.Plugins, 2)
+
+	assert.Equal(t, "cloudtrail", rpv.Plugins[0].Name)
+	assert.Equal(t, "0.6.0", rpv.Plugins[0].Version)
+	assert.Equal(t, "json", rpv.Plugins[1].Name)
+	assert.Equal(t, "0.4.0", rpv.Plugins[1].Version)
+}
+
+func TestParseRequiredPluginVersionsEmpty(t *testing.T) {
+	yaml := `
+- required_plugin_versions:
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rpv, ok := result.Document.Items[0].(RequiredPluginVersions)
+	require.True(t, ok)
+	assert.Empty(t, rpv.Plugins)
+}
+
+// --- Multi-line condition tests ---
+
+func TestParseMultilineConditionFolded(t *testing.T) {
+	yaml := `
+- rule: Test Rule
+  condition: >
+    proc.name = bash
+    and user.name = root
+  output: "test"
+  priority: WARNING
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	assert.True(t, rule.IsFolded, "should detect folded style")
+	assert.Contains(t, rule.Condition, "proc.name = bash")
+}
+
+func TestParseMultilineConditionLiteral(t *testing.T) {
+	yaml := `
+- macro: test_macro
+  condition: |
+    proc.name = bash
+    and user.name = root
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	macro, ok := result.Document.Items[0].(Macro)
+	require.True(t, ok)
+	// Literal style is not considered folded
+	assert.False(t, macro.IsFolded, "literal style should not be folded")
+	assert.Contains(t, macro.Condition, "proc.name = bash")
+}
+
+// --- Line/Column position tests ---
+
+func TestParseLineColumnPositions(t *testing.T) {
+	yaml := `- rule: Test Rule
+  desc: Description
+  condition: proc.name = bash
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	assert.Equal(t, 1, rule.Line, "rule should start at line 1")
+	// Column is 0-based from 1-based YAML: "- rule:" starts at column 1 in YAML -> 0-based
+	// But the mapping node (what we parse) includes the "- " so actual column is 2 (3 in 1-based)
+	assert.GreaterOrEqual(t, rule.Column, 0, "rule column should be non-negative")
+	assert.Greater(t, rule.ConditionLine, 0, "condition line should be set")
+	assert.GreaterOrEqual(t, rule.ConditionCol, 0, "condition column should be non-negative")
+}
+
+// --- Edge cases ---
+
+func TestParseListWithNoItems(t *testing.T) {
+	yaml := `
+- list: empty_list
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	list, ok := result.Document.Items[0].(List)
+	require.True(t, ok)
+	assert.Equal(t, "empty_list", list.Name)
+	assert.False(t, list.HasItems, "HasItems should be false when items not specified")
+	assert.Nil(t, list.Items)
+}
+
+func TestParseListWithEmptyItems(t *testing.T) {
+	yaml := `
+- list: empty_list
+  items: []
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	list, ok := result.Document.Items[0].(List)
+	require.True(t, ok)
+	assert.True(t, list.HasItems, "HasItems should be true when items explicitly set")
+	assert.Empty(t, list.Items)
+}
+
+func TestParseUnknownItem(t *testing.T) {
+	yaml := `
+- unknown_key: some_value
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	// Unknown items are skipped (return nil from parseItemFromNode)
+	assert.Empty(t, result.Document.Items)
+}
+
+func TestParseNotSequenceRoot(t *testing.T) {
+	yaml := `rule: not_a_sequence`
+
+	_, err := Parse(yaml, "test.yaml")
+
+	// Should error because root is not a sequence
+	assert.Error(t, err)
+}
+
+func TestParseWhitespaceOnly(t *testing.T) {
+	yaml := "   \n\n\t  \n"
+
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.NotNil(t, result.Document)
+	assert.Empty(t, result.Document.Items)
+}
+
+func TestParseMacroNoCondition(t *testing.T) {
+	yaml := `
+- macro: test_macro
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	macro, ok := result.Document.Items[0].(Macro)
+	require.True(t, ok)
+	assert.Equal(t, "test_macro", macro.Name)
+	assert.Empty(t, macro.Condition)
+}
+
+func TestParseNonMappingSequenceItem(t *testing.T) {
+	yaml := `
+- simple_string_item
+- rule: Valid Rule
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	// Only the valid rule should be parsed
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	assert.Equal(t, "Valid Rule", rule.Name)
+}
+
+func TestParseRuleWithoutEnabled(t *testing.T) {
+	yaml := `
+- rule: Test Rule
+  desc: Test
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	assert.Nil(t, rule.Enabled, "enabled should be nil when not specified")
+}
+
+func TestParseExceptionsWithNonMappingItem(t *testing.T) {
+	yaml := `
+- rule: Test Rule
+  exceptions:
+    - not_a_mapping
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	// Non-mapping items in exceptions are skipped
+	assert.Empty(t, rule.Exceptions)
+}
+
+func TestParseExceptionsValuesWithNonSequence(t *testing.T) {
+	yaml := `
+- rule: Test Rule
+  exceptions:
+    - name: ex1
+      values:
+        - not_a_sequence
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rule, ok := result.Document.Items[0].(Rule)
+	require.True(t, ok)
+	require.Len(t, rule.Exceptions, 1)
+	// Values that are not sequences are skipped
+	assert.Empty(t, rule.Exceptions[0].Values)
+}
+
+func TestParseRequiredPluginVersionsNonSequence(t *testing.T) {
+	yaml := `
+- required_plugin_versions: not_a_sequence
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rpv, ok := result.Document.Items[0].(RequiredPluginVersions)
+	require.True(t, ok)
+	assert.Empty(t, rpv.Plugins)
+}
+
+func TestParseRequiredPluginVersionsNonMappingItem(t *testing.T) {
+	yaml := `
+- required_plugin_versions:
+    - not_a_mapping
+`
+	result, err := Parse(yaml, "test.yaml")
+
+	require.NoError(t, err)
+	require.Len(t, result.Document.Items, 1)
+
+	rpv, ok := result.Document.Items[0].(RequiredPluginVersions)
+	require.True(t, ok)
+	// Non-mapping items are skipped
+	assert.Empty(t, rpv.Plugins)
+}

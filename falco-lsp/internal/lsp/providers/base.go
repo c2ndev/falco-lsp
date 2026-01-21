@@ -16,37 +16,41 @@
 package providers
 
 import (
+	"github.com/c2ndev/falco-lsp/internal/analyzer"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
+	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 )
 
-// Dependencies holds the common dependencies for all providers.
-type Dependencies struct {
-	Documents *document.Store
+// SymbolLookup holds the result of looking up a symbol at a cursor position.
+type SymbolLookup struct {
+	Word    string
+	Symbols *analyzer.SymbolTable
 }
 
-// NewDependencies creates a new Dependencies instance.
-func NewDependencies(docs *document.Store) *Dependencies {
-	return &Dependencies{
-		Documents: docs,
+// GetSymbolAtPosition returns the word and symbols at a given position.
+// Returns nil if:
+// - doc is nil
+// - word at position is empty
+// - no symbols are available in the document store
+//
+// This helper eliminates duplicated lookup patterns across hover, definition, and references providers.
+func GetSymbolAtPosition(doc *document.Document, docs *document.Store, pos protocol.Position) *SymbolLookup {
+	if doc == nil {
+		return nil
 	}
-}
 
-// Base provides common functionality for all LSP providers.
-type Base struct {
-	deps *Dependencies
-}
+	word := doc.GetWordAtPosition(pos)
+	if word == "" {
+		return nil
+	}
 
-// NewBase creates a new base provider.
-func NewBase(deps *Dependencies) Base {
-	return Base{deps: deps}
-}
+	symbols := docs.GetAllSymbols()
+	if symbols == nil {
+		return nil
+	}
 
-// GetDocument retrieves a document by URI.
-func (b *Base) GetDocument(uri string) (*document.Document, bool) {
-	return b.deps.Documents.Get(uri)
-}
-
-// GetDocuments returns the document store.
-func (b *Base) GetDocuments() *document.Store {
-	return b.deps.Documents
+	return &SymbolLookup{
+		Word:    word,
+		Symbols: symbols,
+	}
 }

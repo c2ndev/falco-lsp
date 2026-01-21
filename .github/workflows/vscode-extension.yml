@@ -7,8 +7,6 @@ on:
       - "vscode-extension/**"
       - "falco-lsp/**"
       - ".github/workflows/vscode-extension.yml"
-    tags:
-      - "v*"
   pull_request:
     branches: [main, master]
     paths:
@@ -25,69 +23,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Setup Go (for language server)
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-          cache: true
-          cache-dependency-path: falco-lsp/go.sum
-
-      - name: Build language server
-        working-directory: ./falco-lsp
-        run: |
-          go build -ldflags="-s -w" -o ../vscode-extension/bin/falco-lang ./cmd/falco-lang
-
-      - name: Build extension
-        working-directory: ./vscode-extension
-        run: pnpm run build
-
-      - name: Package extension
-        working-directory: ./vscode-extension
-        run: |
-          npx @vscode/vsce package --no-dependencies
-
-      - name: Upload VSIX
-        uses: actions/upload-artifact@v4
-        with:
-          name: falco-vscode-extension
-          path: vscode-extension/*.vsix
-
-  publish:
-    name: Publish to Marketplace
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies
-        run: pnpm install
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -95,26 +30,31 @@ jobs:
           cache: true
           cache-dependency-path: falco-lsp/go.sum
 
-      - name: Build language server
+      - name: Build language server binaries
         working-directory: ./falco-lsp
-        run: |
-          go build -ldflags="-s -w" -o ../vscode-extension/bin/falco-lang ./cmd/falco-lang
+        run: make build-extension
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./vscode-extension
+        run: npm ci
 
       - name: Build extension
         working-directory: ./vscode-extension
-        run: pnpm run build
+        run: npm run build
 
-      - name: Publish to VS Code Marketplace
+      - name: Package extension
         working-directory: ./vscode-extension
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          npx @vscode/vsce publish --no-dependencies
+        run: npx @vscode/vsce package --no-dependencies
 
-      - name: Publish to Open VSX Registry
-        working-directory: ./vscode-extension
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: |
-          npx ovsx publish --no-dependencies
-        continue-on-error: true
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: falco-vscode-extension
+          path: vscode-extension/*.vsix

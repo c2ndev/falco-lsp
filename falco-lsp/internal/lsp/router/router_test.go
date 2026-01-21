@@ -18,9 +18,10 @@ package router
 import (
 	"testing"
 
-	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
 )
 
 func TestRouter_RegisterAndDispatch(t *testing.T) {

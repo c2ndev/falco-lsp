@@ -170,7 +170,9 @@ func (h *Handlers) HandleShutdown(msg *protocol.Message) *protocol.Message {
 	if h.onShutdown != nil {
 		h.onShutdown()
 	}
-	return protocol.NewResponse(msg.ID, nil)
+	// Use NewNullResponse to ensure the result is explicitly null in JSON
+	// This is required by the LSP spec for the shutdown response
+	return protocol.NewNullResponse(msg.ID)
 }
 
 // HandleDidOpen handles textDocument/didOpen notifications.
@@ -276,12 +278,19 @@ func (h *Handlers) HandleCompletion(msg *protocol.Message) *protocol.Message {
 			fmt.Sprintf("Invalid completion params: %v", err))
 	}
 
+	logging.Debug("Completion request",
+		"uri", params.TextDocument.URI,
+		"line", params.Position.Line,
+		"character", params.Position.Character)
+
 	doc, ok := h.documents.Get(params.TextDocument.URI)
 	if !ok {
+		logging.Debug("Document not found for completion", "uri", params.TextDocument.URI)
 		return protocol.NewResponse(msg.ID, []protocol.CompletionItem{})
 	}
 
 	items := h.completion.GetCompletions(doc, params)
+	logging.Debug("Completion items returned", "count", len(items))
 	return protocol.NewResponse(msg.ID, items)
 }
 

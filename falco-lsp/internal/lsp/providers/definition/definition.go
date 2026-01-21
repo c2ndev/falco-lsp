@@ -18,6 +18,7 @@ package definition
 import (
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
+	"github.com/c2ndev/falco-lsp/internal/lsp/providers"
 )
 
 // Provider handles go-to-definition requests.
@@ -37,63 +38,28 @@ func (p *Provider) GetDefinition(
 	doc *document.Document,
 	params protocol.TextDocumentPositionParams,
 ) *protocol.Location {
-	if doc == nil {
+	// Use shared helper to get word and symbols at position
+	lookup := providers.GetSymbolAtPosition(doc, p.documents, params.Position)
+	if lookup == nil {
 		return nil
 	}
 
-	word := doc.GetWordAtPosition(params.Position)
-	if word == "" {
-		return nil
-	}
-
-	symbols := p.documents.GetAllSymbols()
-	if symbols == nil {
-		return nil
-	}
+	word := lookup.Word
+	symbols := lookup.Symbols
 
 	// Check macros
 	if macro, ok := symbols.Macros[word]; ok {
-		lineIdx := macro.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		return &protocol.Location{
-			URI: document.NormalizeURI(macro.File),
-			Range: protocol.Range{
-				Start: protocol.Position{Line: lineIdx, Character: 0},
-				End:   protocol.Position{Line: lineIdx, Character: len(word)},
-			},
-		}
+		return protocol.NewSymbolLocationPtr(document.NormalizeURI(macro.File), macro.Line, len(word))
 	}
 
 	// Check lists
 	if list, ok := symbols.Lists[word]; ok {
-		lineIdx := list.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		return &protocol.Location{
-			URI: document.NormalizeURI(list.File),
-			Range: protocol.Range{
-				Start: protocol.Position{Line: lineIdx, Character: 0},
-				End:   protocol.Position{Line: lineIdx, Character: len(word)},
-			},
-		}
+		return protocol.NewSymbolLocationPtr(document.NormalizeURI(list.File), list.Line, len(word))
 	}
 
 	// Check rules
 	if rule, ok := symbols.Rules[word]; ok {
-		lineIdx := rule.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		return &protocol.Location{
-			URI: document.NormalizeURI(rule.File),
-			Range: protocol.Range{
-				Start: protocol.Position{Line: lineIdx, Character: 0},
-				End:   protocol.Position{Line: lineIdx, Character: len(word)},
-			},
-		}
+		return protocol.NewSymbolLocationPtr(document.NormalizeURI(rule.File), rule.Line, len(word))
 	}
 
 	return nil

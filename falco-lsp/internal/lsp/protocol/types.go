@@ -445,12 +445,31 @@ const (
 	SymbolKindTypeParameter = 26
 )
 
+// NullResult is a sentinel value that serializes to JSON null.
+// Use this when a response requires an explicit null result (e.g., shutdown).
+type NullResult struct{}
+
+// MarshalJSON implements json.Marshaler for NullResult.
+func (NullResult) MarshalJSON() ([]byte, error) {
+	return []byte("null"), nil
+}
+
 // NewResponse creates a new JSON-RPC response message.
-func NewResponse(id interface{}, result interface{}) *Message {
+func NewResponse(id, result interface{}) *Message {
 	return &Message{
 		JSONRPC: JSONRPCVersion,
 		ID:      id,
 		Result:  result,
+	}
+}
+
+// NewNullResponse creates a new JSON-RPC response with explicit null result.
+// This is required for methods like shutdown that must return null.
+func NewNullResponse(id interface{}) *Message {
+	return &Message{
+		JSONRPC: JSONRPCVersion,
+		ID:      id,
+		Result:  NullResult{},
 	}
 }
 

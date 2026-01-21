@@ -18,8 +18,10 @@ package symbols
 import (
 	"strings"
 
+	"github.com/c2ndev/falco-lsp/internal/config"
 	"github.com/c2ndev/falco-lsp/internal/lsp/document"
 	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
+	"github.com/c2ndev/falco-lsp/internal/schema"
 	"github.com/c2ndev/falco-lsp/internal/utils"
 )
 
@@ -62,16 +64,7 @@ func (p *Provider) GetDocumentSymbols(doc *document.Document) []protocol.Documen
 		}
 
 		// Calculate actual range from document content
-		lineIdx := rule.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		lineContent := ""
-		lineLen := 0
-		if lineIdx < len(lines) {
-			lineContent = lines[lineIdx]
-			lineLen = len(lineContent)
-		}
+		lineIdx, lineContent, lineLen := protocol.GetLineInfo(lines, rule.Line)
 
 		// Find the actual position of the name in the line
 		nameStart, nameEnd := findNameInLine(lineContent, name, "rule:")
@@ -102,22 +95,13 @@ func (p *Provider) GetDocumentSymbols(doc *document.Document) []protocol.Documen
 			continue
 		}
 
-		lineIdx := macro.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		lineContent := ""
-		lineLen := 0
-		if lineIdx < len(lines) {
-			lineContent = lines[lineIdx]
-			lineLen = len(lineContent)
-		}
+		lineIdx, lineContent, lineLen := protocol.GetLineInfo(lines, macro.Line)
 
 		nameStart, nameEnd := findNameInLine(lineContent, name, "macro:")
 
 		sym := protocol.DocumentSymbol{
 			Name:   name,
-			Detail: "macro",
+			Detail: schema.BlockMacro.String(),
 			Kind:   protocol.SymbolKindFunction, // Macros are like functions
 			Range: protocol.Range{
 				Start: protocol.Position{Line: lineIdx, Character: 0},
@@ -137,25 +121,8 @@ func (p *Provider) GetDocumentSymbols(doc *document.Document) []protocol.Documen
 			continue
 		}
 
-		detail := ""
-		if len(list.Items) > 0 {
-			if len(list.Items) <= 3 {
-				detail = utils.JoinStrings(list.Items, ", ")
-			} else {
-				detail = utils.JoinStrings(list.Items[:3], ", ") + "..."
-			}
-		}
-
-		lineIdx := list.Line - 1
-		if lineIdx < 0 {
-			lineIdx = 0
-		}
-		lineContent := ""
-		lineLen := 0
-		if lineIdx < len(lines) {
-			lineContent = lines[lineIdx]
-			lineLen = len(lineContent)
-		}
+		detail := formatListDetail(list.Items)
+		lineIdx, lineContent, lineLen := protocol.GetLineInfo(lines, list.Line)
 
 		nameStart, nameEnd := findNameInLine(lineContent, name, "list:")
 
@@ -178,42 +145,6 @@ func (p *Provider) GetDocumentSymbols(doc *document.Document) []protocol.Documen
 	return result
 }
 
-// findNameInLine finds the position of a name after a keyword in a line.
-// Returns (start, end) character positions.
-func findNameInLine(line, name, keyword string) (int, int) {
-	// Default fallback
-	keywordLen := len(keyword) + 2 // "- keyword: " = keyword + 2 (for "- ")
-	defaultStart := keywordLen + 1 // After the space
-	defaultEnd := defaultStart + len(name)
-
-	// Try to find the keyword in the line
-	kwIdx := strings.Index(line, keyword)
-	if kwIdx == -1 {
-		return defaultStart, defaultEnd
-	}
-
-	// Find the name after the keyword
-	afterKeyword := kwIdx + len(keyword)
-	remaining := line[afterKeyword:]
-
-	// Skip whitespace
-	nameStart := afterKeyword
-	for i, c := range remaining {
-		if c != ' ' && c != '\t' {
-			nameStart = afterKeyword + i
-			break
-		}
-	}
-
-	// The name extends for len(name) characters
-	nameEnd := nameStart + len(name)
-	if nameEnd > len(line) {
-		nameEnd = len(line)
-	}
-
-	return nameStart, nameEnd
-}
-
 // findRuleChildren finds child properties of a rule (condition, output, etc.)
 func (p *Provider) findRuleChildren(lines []string, ruleLineIdx int) []protocol.DocumentSymbol {
 	var children []protocol.DocumentSymbol
@@ -224,7 +155,7 @@ func (p *Provider) findRuleChildren(lines []string, ruleLineIdx int) []protocol.
 		trimmed := strings.TrimSpace(line)
 
 		// Stop at next top-level item (starts with "- ")
-		if strings.HasPrefix(trimmed, "- ") {
+		if strings.HasPrefix(trimmed, config.YAMLListItemPrefix) {
 			break
 		}
 
@@ -234,54 +165,12 @@ func (p *Provider) findRuleChildren(lines []string, ruleLineIdx int) []protocol.
 		}
 
 		// Look for property definitions
-		switch {
-		case strings.HasPrefix(trimmed, "condition:"):
-			start := strings.Index(line, "condition:")
-			if start != -1 {
-				children = append(children, protocol.DocumentSymbol{
-					Name: "condition",
-					Kind: protocol.SymbolKindProperty,
-					Range: protocol.Range{
-						Start: protocol.Position{Line: i, Character: 0},
-						End:   protocol.Position{Line: i, Character: len(line)},
-					},
-					SelectionRange: protocol.Range{
-						Start: protocol.Position{Line: i, Character: start},
-						End:   protocol.Position{Line: i, Character: start + 9}, // len("condition")
-					},
-				})
-			}
-		case strings.HasPrefix(trimmed, "output:"):
-			start := strings.Index(line, "output:")
-			if start != -1 {
-				children = append(children, protocol.DocumentSymbol{
-					Name: "output",
-					Kind: protocol.SymbolKindProperty,
-					Range: protocol.Range{
-						Start: protocol.Position{Line: i, Character: 0},
-						End:   protocol.Position{Line: i, Character: len(line)},
-					},
-					SelectionRange: protocol.Range{
-						Start: protocol.Position{Line: i, Character: start},
-						End:   protocol.Position{Line: i, Character: start + 6}, // len("output")
-					},
-				})
-			}
-		case strings.HasPrefix(trimmed, "priority:"):
-			start := strings.Index(line, "priority:")
-			if start != -1 {
-				children = append(children, protocol.DocumentSymbol{
-					Name: "priority",
-					Kind: protocol.SymbolKindProperty,
-					Range: protocol.Range{
-						Start: protocol.Position{Line: i, Character: 0},
-						End:   protocol.Position{Line: i, Character: len(line)},
-					},
-					SelectionRange: protocol.Range{
-						Start: protocol.Position{Line: i, Character: start},
-						End:   protocol.Position{Line: i, Character: start + 8}, // len("priority")
-					},
-				})
+		for _, prop := range childProperties {
+			if strings.HasPrefix(trimmed, prop.prefix) {
+				if sym := newPropertySymbol(line, i, prop.name); sym != nil {
+					children = append(children, *sym)
+				}
+				break
 			}
 		}
 	}

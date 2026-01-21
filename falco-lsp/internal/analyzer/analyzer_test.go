@@ -18,10 +18,11 @@ package analyzer
 import (
 	"testing"
 
-	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/c2ndev/falco-lsp/internal/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/c2ndev/falco-lsp/internal/parser"
+	"github.com/c2ndev/falco-lsp/internal/schema"
 )
 
 func TestAnalyzeValidRule(t *testing.T) {
@@ -520,4 +521,59 @@ func TestAnalyzeDuplicateRule(t *testing.T) {
 		}
 	}
 	assert.True(t, hasDuplicateError, "expected duplicate rule error")
+}
+
+func TestHasImplicitArgument(t *testing.T) {
+	a := NewAnalyzer()
+
+	tests := []struct {
+		name           string
+		fieldUsage     string
+		registeredName string
+		expected       bool
+	}{
+		{
+			name:           "evt.arg.flags has implicit argument",
+			fieldUsage:     "evt.arg.flags",
+			registeredName: "evt.arg",
+			expected:       true,
+		},
+		{
+			name:           "evt.arg with bracket index",
+			fieldUsage:     "evt.arg[0]",
+			registeredName: "evt.arg",
+			expected:       true,
+		},
+		{
+			name:           "exact match - no implicit argument",
+			fieldUsage:     "proc.name",
+			registeredName: "proc.name",
+			expected:       false,
+		},
+		{
+			name:           "shorter usage than registered",
+			fieldUsage:     "proc",
+			registeredName: "proc.name",
+			expected:       false,
+		},
+		{
+			name:           "different prefix",
+			fieldUsage:     "fd.name",
+			registeredName: "proc.name",
+			expected:       false,
+		},
+		{
+			name:           "no separator after registered name",
+			fieldUsage:     "evt.argx",
+			registeredName: "evt.arg",
+			expected:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := a.hasImplicitArgument(tt.fieldUsage, tt.registeredName)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }
