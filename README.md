@@ -6,7 +6,7 @@
 
 > UNOFFICIAL language tooling for Falco security rules.
 
-[![Go Tests](https://github.com/c2ndev/falco-lsp/workflows/Go%20Tests/badge.svg)](https://github.com/c2ndev/falco-lsp/actions)
+[![CI](https://github.com/c2ndev/falco-lsp/workflows/Falco%20LSP%20CI/badge.svg)](https://github.com/c2ndev/falco-lsp/actions)
 [![Build](https://github.com/c2ndev/falco-lsp/workflows/Build%20Binaries/badge.svg)](https://github.com/c2ndev/falco-lsp/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 

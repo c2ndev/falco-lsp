@@ -25,6 +25,9 @@ import (
 // Logger is the package-level logger for the LSP server.
 var Logger *slog.Logger
 
+// logFile holds the current log file so it can be closed on re-init.
+var logFileHandle *os.File
+
 // Level represents the logging level.
 type Level int
 
@@ -45,6 +48,12 @@ const (
 // If logFile is "-", logs go to stderr.
 // Otherwise, logs go to the specified file.
 func Init(logFile string, level Level) error {
+	// Close the previous log file if one was open.
+	if logFileHandle != nil {
+		_ = logFileHandle.Close()
+		logFileHandle = nil
+	}
+
 	var writer io.Writer = os.Stderr
 
 	if logFile != "" && logFile != "-" {
@@ -61,6 +70,7 @@ func Init(logFile string, level Level) error {
 			return err
 		}
 		writer = f
+		logFileHandle = f
 	}
 
 	var slogLevel slog.Level
