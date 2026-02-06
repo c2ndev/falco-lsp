@@ -26,11 +26,11 @@ jobs:
         run: go test -v -race ./...
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          version: v2.1
           working-directory: ./falco-lsp
-          args: --timeout=5m
+          args: run --timeout=5m
 
   build-binaries:
     name: Build Binaries
@@ -80,12 +80,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: vscode-extension/package-lock.json
 
       - name: Install dependencies
         working-directory: ./vscode-extension
-        run: npm ci
+        run: npm install
 
       - name: Build extension
         working-directory: ./vscode-extension
