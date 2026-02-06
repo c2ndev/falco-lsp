@@ -5,85 +5,100 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.22"
+  NODE_VERSION: "20"
+
 jobs:
   test:
-    name: Run Tests
+    name: Test & Lint
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: falco-lsp/go.sum
 
-      - name: Run tests
-        working-directory: ./falco-lsp
-        run: go test -v -race ./...
-
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           version: v2.1
           working-directory: ./falco-lsp
           args: run --timeout=5m
 
-  build-binaries:
-    name: Build Binaries
+      - name: Run tests
+        working-directory: ./falco-lsp
+        run: go test -race ./...
+
+  build:
+    name: Build Binaries & Extension
     runs-on: ubuntu-latest
+    needs: [test]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: falco-lsp/go.sum
 
+      - name: Verify version from tag
+        working-directory: ./falco-lsp
+        run: |
+          VERSION=$(git describe --tags --always)
+          echo "Building version: ${VERSION}"
+
       - name: Build all platform binaries
         working-directory: ./falco-lsp
-        run: make build-all
+        run: make build-extension
+
+      - name: Generate checksums
+        working-directory: ./falco-lsp/build
+        run: |
+          sha256sum falco-lang-* > checksums.txt
+          cat checksums.txt
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
           name: binaries
-          path: falco-lsp/build/falco-lang-*
-
-  build-extension:
-    name: Build VS Code Extension
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-          cache: true
-          cache-dependency-path: falco-lsp/go.sum
-
-      - name: Build language server binaries
-        working-directory: ./falco-lsp
-        run: make build-extension
+          path: |
+            falco-lsp/build/falco-lang-*
+            falco-lsp/build/checksums.txt
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
         working-directory: ./vscode-extension
         run: npm install
+
+      - name: Lint extension
+        working-directory: ./vscode-extension
+        run: npm run lint
+
+      - name: Type check extension
+        working-directory: ./vscode-extension
+        run: npm run typecheck
 
       - name: Build extension
         working-directory: ./vscode-extension
@@ -100,8 +115,8 @@ jobs:
           path: vscode-extension/*.vsix
 
   release:
-    name: Create Release
-    needs: [test, build-binaries, build-extension]
+    name: Publish Release
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
@@ -131,16 +146,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Publish to VS Code Marketplace
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: npx @vscode/vsce publish --packagePath dist/*.vsix
+        continue-on-error: true
 
       - name: Publish to Open VSX Registry
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: npx ovsx publish dist/*.vsix
         continue-on-error: true
-

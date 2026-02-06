@@ -35,7 +35,10 @@ func TestInit(t *testing.T) {
 }
 
 func TestInitWithFile(t *testing.T) {
-	// Create temp dir for log file
+	// Save and restore Logger so file handle is released before TempDir cleanup.
+	oldLogger := Logger
+	defer func() { Logger = oldLogger }()
+
 	tmpDir := t.TempDir()
 	logFile := filepath.Join(tmpDir, "test.log")
 
@@ -49,6 +52,9 @@ func TestInitWithFile(t *testing.T) {
 	// Verify file was created
 	_, err = os.Stat(logFile)
 	assert.False(t, os.IsNotExist(err), "log file should exist")
+
+	// Reset logger to stderr to release the file handle (required for Windows cleanup).
+	_ = Init("", LevelInfo)
 }
 
 func TestInitWithDash(t *testing.T) {
