@@ -35,7 +35,7 @@ jobs:
         with:
           version: v2.1
           working-directory: ./falco-lsp
-          args: run --timeout=5m
+          args: --timeout=5m
 
       - name: Run tests
         working-directory: ./falco-lsp
@@ -59,10 +59,11 @@ jobs:
           cache: true
           cache-dependency-path: falco-lsp/go.sum
 
-      - name: Verify version from tag
-        working-directory: ./falco-lsp
+      - name: Extract version from tag
+        id: version
         run: |
-          VERSION=$(git describe --tags --always)
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Building version: ${VERSION}"
 
       - name: Build all platform binaries
@@ -87,6 +88,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Set extension version from tag
+        working-directory: ./vscode-extension
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
       - name: Install dependencies
         working-directory: ./vscode-extension

@@ -40,7 +40,7 @@ jobs:
         with:
           version: v2.1
           working-directory: ./falco-lsp
-          args: run --timeout=5m
+          args: --timeout=5m
 
   test:
     name: Test (${{ matrix.os }}, Go ${{ matrix.go-version }})
