@@ -91,7 +91,7 @@ jobs:
 
       - name: Set extension version from tag
         working-directory: ./vscode-extension
-        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Install dependencies
         working-directory: ./vscode-extension
