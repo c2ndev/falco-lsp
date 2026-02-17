@@ -1,5 +1,7 @@
 # See the OWNERS docs: https://github.com/falcosecurity/evolution/blob/main/OWNERS.md
 approvers:
   - c2ndev
+  - leogr
 reviewers:
   - c2ndev
+  - leogr

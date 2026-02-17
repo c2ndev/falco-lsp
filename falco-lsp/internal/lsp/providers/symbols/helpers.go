@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2026 Alessandro Cannarella
+// Copyright (C) 2026 The Falco Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package symbols
 
 import (
 	"strings"
 
-	"github.com/c2ndev/falco-lsp/internal/config"
-	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
-	"github.com/c2ndev/falco-lsp/internal/schema"
-	"github.com/c2ndev/falco-lsp/internal/utils"
+	"github.com/falcosecurity/falco-lsp/internal/config"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/protocol"
+	"github.com/falcosecurity/falco-lsp/internal/schema"
+	"github.com/falcosecurity/falco-lsp/internal/utils"
 )
 
 // formatListDetail formats list items for display in symbol detail.

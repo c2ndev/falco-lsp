@@ -37,6 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cross-platform Go language server (Linux, macOS, Windows)
 - CLI tool (`falco-lang`) with validate, format, and lsp commands
 
-[Unreleased]: https://github.com/c2ndev/falco-lsp/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/c2ndev/falco-lsp/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/c2ndev/falco-lsp/releases/tag/v0.1.0
+[Unreleased]: https://github.com/falcosecurity/falco-lsp/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/falcosecurity/falco-lsp/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/falcosecurity/falco-lsp/releases/tag/v0.1.0

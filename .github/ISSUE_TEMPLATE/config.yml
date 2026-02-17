@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🚀 Falco Community
+    url: https://falco.org/community/
+    about: Join the Falco community for general discussions
+  - name: 💬 Slack Channel
+    url: https://kubernetes.slack.com/messages/falco
+    about: Chat with the Falco community on Kubernetes Slack
+  - name: 📖 Documentation
+    url: https://github.com/falcosecurity/falco-lsp/blob/main/README.md
+    about: Read the project documentation
+  - name: 🔒 Security Issues
+    url: https://github.com/falcosecurity/.github/blob/main/SECURITY.md
+    about: Report security vulnerabilities privately

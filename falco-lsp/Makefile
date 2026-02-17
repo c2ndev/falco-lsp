@@ -16,9 +16,9 @@ GOMOD := $(GOCMD) mod
 
 # Build flags
 LDFLAGS := -ldflags "-s -w \
-	-X github.com/c2ndev/falco-lsp/internal/version.Version=$(VERSION) \
-	-X github.com/c2ndev/falco-lsp/internal/version.Commit=$(COMMIT) \
-	-X github.com/c2ndev/falco-lsp/internal/version.BuildTime=$(BUILD_TIME)"
+	-X github.com/falcosecurity/falco-lsp/internal/version.Version=$(VERSION) \
+	-X github.com/falcosecurity/falco-lsp/internal/version.Commit=$(COMMIT) \
+	-X github.com/falcosecurity/falco-lsp/internal/version.BuildTime=$(BUILD_TIME)"
 
 # Directories
 BUILD_DIR := build

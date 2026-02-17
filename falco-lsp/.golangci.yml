@@ -13,11 +13,11 @@ formatters:
       sections:
         - standard # Captures all standard packages if they do not match another section.
         - default # Contains all imports that could not be matched to another section type.
-        - prefix(github.com/c2ndev/falco-lsp) # Groups all imports with the specified Prefix.
+        - prefix(github.com/falcosecurity/falco-lsp) # Groups all imports with the specified Prefix.
 
     goimports:
       local-prefixes:
-        - github.com/c2ndev/falco-lsp
+        - github.com/falcosecurity/falco-lsp
 
 linters:
   settings:
@@ -27,7 +27,7 @@ linters:
     goheader:
       values:
         const:
-          AUTHORS: Alessandro Cannarella
+          AUTHORS: The Falco Authors
       template: |-
         SPDX-License-Identifier: Apache-2.0
         Copyright (C) {{ YEAR }} {{ AUTHORS }}

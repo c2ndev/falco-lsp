@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2026 Alessandro Cannarella
+// Copyright (C) 2026 The Falco Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package lsp
 
@@ -25,20 +26,20 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/c2ndev/falco-lsp/internal/config"
-	"github.com/c2ndev/falco-lsp/internal/lsp/document"
-	"github.com/c2ndev/falco-lsp/internal/lsp/handlers"
-	"github.com/c2ndev/falco-lsp/internal/lsp/logging"
-	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/completion"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/definition"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/formatting"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/hover"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/references"
-	"github.com/c2ndev/falco-lsp/internal/lsp/providers/symbols"
-	"github.com/c2ndev/falco-lsp/internal/lsp/router"
-	"github.com/c2ndev/falco-lsp/internal/lsp/transport"
-	"github.com/c2ndev/falco-lsp/internal/version"
+	"github.com/falcosecurity/falco-lsp/internal/config"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/document"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/handlers"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/logging"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/protocol"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/completion"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/definition"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/formatting"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/hover"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/references"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/providers/symbols"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/router"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/transport"
+	"github.com/falcosecurity/falco-lsp/internal/version"
 )
 
 // Server represents an LSP server for Falco rules.

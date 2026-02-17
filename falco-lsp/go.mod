@@ -1,4 +1,4 @@
-module github.com/c2ndev/falco-lsp
+module github.com/falcosecurity/falco-lsp
 
 go 1.22
 

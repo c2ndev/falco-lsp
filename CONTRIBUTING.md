@@ -10,7 +10,7 @@ This project follows standard open-source community guidelines. Please be respec
 
 ### Reporting Issues
 
-- Use the [GitHub issue tracker](https://github.com/c2ndev/falco-lsp/issues)
+- Use the [GitHub issue tracker](https://github.com/falcosecurity/falco-lsp/issues)
 - Search existing issues before creating a new one
 - Provide as much detail as possible:
   - Steps to reproduce
@@ -30,7 +30,7 @@ This project follows standard open-source community guidelines. Please be respec
 
 ```bash
 # Clone the repository
-git clone https://github.com/c2ndev/falco-lsp.git
+git clone https://github.com/falcosecurity/falco-lsp.git
 cd falco-lsp
 
 # Build the language server
@@ -129,8 +129,8 @@ Releases are managed via git tags:
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/c2ndev/falco-lsp/issues)
-- [GitHub Discussions](https://github.com/c2ndev/falco-lsp/discussions)
+- [GitHub Issues](https://github.com/falcosecurity/falco-lsp/issues)
+- [GitHub Discussions](https://github.com/falcosecurity/falco-lsp/discussions)
 
 ## License
 

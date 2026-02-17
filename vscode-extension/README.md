@@ -1,7 +1,7 @@
 # Falco Rules for Visual Studio Code
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/c2ndev/falco-lsp/main/vscode-extension/icons/falco.png" alt="Falco" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/falcosecurity/falco-lsp/main/vscode-extension/icons/falco.png" alt="Falco" width="128" height="128">
 </p>
 
 <p align="center">
@@ -9,13 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=c2ndev.falco-rules">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/c2ndev.falco-rules?style=flat-square&label=VS%20Marketplace" alt="VS Marketplace Version">
+  <a href="https://marketplace.visualstudio.com/items?itemName=falcosecurity.falco-rules">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/falcosecurity.falco-rules?style=flat-square&label=VS%20Marketplace" alt="VS Marketplace Version">
   </a>
-  <a href="https://marketplace.visualstudio.com/items?itemName=c2ndev.falco-rules">
-    <img src="https://img.shields.io/visual-studio-marketplace/i/c2ndev.falco-rules?style=flat-square" alt="Installs">
+  <a href="https://marketplace.visualstudio.com/items?itemName=falcosecurity.falco-rules">
+    <img src="https://img.shields.io/visual-studio-marketplace/i/falcosecurity.falco-rules?style=flat-square" alt="Installs">
   </a>
-  <a href="https://github.com/c2ndev/falco-lsp/blob/main/LICENSE">
+  <a href="https://github.com/falcosecurity/falco-lsp/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square" alt="License">
   </a>
 </p>
@@ -115,7 +115,7 @@ Automatic schema validation for `.falco.yaml`, `.falco.yml`, `*_rules.yaml`, and
 ### From Command Line
 
 ```bash
-code --install-extension c2ndev.falco-rules
+code --install-extension falcosecurity.falco-rules
 ```
 
 ### Language Server Binary
@@ -129,7 +129,7 @@ The extension requires the `falco-lang` binary for full functionality. You can:
    make build
    make install  # Installs to $GOPATH/bin
    ```
-3. **Download from releases**: Get pre-built binaries from [GitHub Releases](https://github.com/c2ndev/falco-lsp/releases)
+3. **Download from releases**: Get pre-built binaries from [GitHub Releases](https://github.com/falcosecurity/falco-lsp/releases)
 
 ---
 
@@ -294,13 +294,13 @@ Ensure the language server is running (check the status bar for "Falco").
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guide](https://github.com/c2ndev/falco-lsp/blob/main/CONTRIBUTING.md) for details.
+Contributions are welcome! Please see our [Contributing Guide](https://github.com/falcosecurity/falco-lsp/blob/main/CONTRIBUTING.md) for details.
 
 ### Development
 
 ```bash
 # Clone the repository
-git clone https://github.com/c2ndev/falco-lsp.git
+git clone https://github.com/falcosecurity/falco-lsp.git
 cd falco-lsp
 
 # Build the Go language server
@@ -322,7 +322,7 @@ npm run build
 - [Falco Documentation](https://falco.org/docs/)
 - [Falco Rules Reference](https://falco.org/docs/rules/)
 - [Falco GitHub Repository](https://github.com/falcosecurity/falco)
-- [Report Issues](https://github.com/c2ndev/falco-lsp/issues)
+- [Report Issues](https://github.com/falcosecurity/falco-lsp/issues)
 
 ---
 

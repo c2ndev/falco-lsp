@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2026 Alessandro Cannarella
+// Copyright (C) 2026 The Falco Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 // Package main implements the falco-lang CLI tool.
 package main
@@ -26,11 +27,11 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/c2ndev/falco-lsp/internal/analyzer"
-	"github.com/c2ndev/falco-lsp/internal/formatter"
-	"github.com/c2ndev/falco-lsp/internal/lsp"
-	"github.com/c2ndev/falco-lsp/internal/parser"
-	"github.com/c2ndev/falco-lsp/internal/version"
+	"github.com/falcosecurity/falco-lsp/internal/analyzer"
+	"github.com/falcosecurity/falco-lsp/internal/formatter"
+	"github.com/falcosecurity/falco-lsp/internal/lsp"
+	"github.com/falcosecurity/falco-lsp/internal/parser"
+	"github.com/falcosecurity/falco-lsp/internal/version"
 )
 
 const (

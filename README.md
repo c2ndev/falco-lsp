@@ -4,10 +4,10 @@
   <img src="vscode-extension/icons/falco.png" alt="Falco Rules" width="128" height="128">
 </p>
 
-> UNOFFICIAL language tooling for Falco security rules.
+> Language tooling for Falco security rules.
 
-[![CI](https://github.com/c2ndev/falco-lsp/workflows/Falco%20LSP%20CI/badge.svg)](https://github.com/c2ndev/falco-lsp/actions)
-[![Build](https://github.com/c2ndev/falco-lsp/workflows/Build%20Binaries/badge.svg)](https://github.com/c2ndev/falco-lsp/actions)
+[![CI](https://github.com/falcosecurity/falco-lsp/workflows/Falco%20LSP%20CI/badge.svg)](https://github.com/falcosecurity/falco-lsp/actions)
+[![Build](https://github.com/falcosecurity/falco-lsp/workflows/Build%20Binaries/badge.svg)](https://github.com/falcosecurity/falco-lsp/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 ## Overview
@@ -68,7 +68,7 @@ Install from the VS Code Marketplace:
 Or from command line:
 
 ```bash
-code --install-extension c2ndev.falco-rules
+code --install-extension falcosecurity.falco-rules
 ```
 
 ### CLI Tool
@@ -77,7 +77,7 @@ code --install-extension c2ndev.falco-rules
 
 ```bash
 # Clone the repository
-git clone https://github.com/c2ndev/falco-lsp.git
+git clone https://github.com/falcosecurity/falco-lsp.git
 cd falco-lsp/falco-lsp
 
 # Build

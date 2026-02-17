@@ -69,38 +69,6 @@ falco-lang lsp --stdio
 
 Compatible with any LSP-capable editor (VS Code, Neovim, Emacs, etc.).
 
-## Library Usage
-
-For integration with other Go programs:
-
-```go
-import "github.com/c2ndev/falco-lsp/pkg/falco"
-
-// Parse a rules file
-content := `
-- rule: Test Rule
-  desc: A test rule
-  condition: proc.name = bash
-  output: "Process executed"
-  priority: WARNING
-`
-
-result, err := falco.Parse(content, "rules.yaml")
-if err != nil {
-    log.Fatal(err)
-}
-
-// Validate a rules file
-diagnostics, err := falco.Validate(content, "rules.yaml")
-if err != nil {
-    log.Fatal(err)
-}
-
-for _, d := range diagnostics {
-    fmt.Printf("%s: %s\n", d.Severity, d.Message)
-}
-```
-
 ## Architecture
 
 ```

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2026 Alessandro Cannarella
+// Copyright (C) 2026 The Falco Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 // Package symbols provides document symbol functionality.
 package symbols
@@ -22,10 +23,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/c2ndev/falco-lsp/internal/analyzer"
-	"github.com/c2ndev/falco-lsp/internal/lsp/document"
-	"github.com/c2ndev/falco-lsp/internal/lsp/protocol"
-	"github.com/c2ndev/falco-lsp/internal/parser"
+	"github.com/falcosecurity/falco-lsp/internal/analyzer"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/document"
+	"github.com/falcosecurity/falco-lsp/internal/lsp/protocol"
+	"github.com/falcosecurity/falco-lsp/internal/parser"
 )
 
 func newTestProvider() (*Provider, *document.Store) {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2026 Alessandro Cannarella
+// Copyright (C) 2026 The Falco Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package condition
 
@@ -21,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/c2ndev/falco-lsp/internal/ast"
-	"github.com/c2ndev/falco-lsp/internal/lexer"
+	"github.com/falcosecurity/falco-lsp/internal/ast"
+	"github.com/falcosecurity/falco-lsp/internal/lexer"
 )
 
 // ParseError represents a parsing error with location information.

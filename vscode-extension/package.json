@@ -3,14 +3,14 @@
   "displayName": "Falco Rules",
   "description": "Full language support for Falco Security Rules with syntax highlighting, code completion, validation, and more",
   "version": "0.1.0",
-  "publisher": "c2ndev",
+  "publisher": "falcosecurity",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/c2ndev/falco-lsp"
+    "url": "https://github.com/falcosecurity/falco-lsp"
   },
   "bugs": {
-    "url": "https://github.com/c2ndev/falco-lsp/issues"
+    "url": "https://github.com/falcosecurity/falco-lsp/issues"
   },
   "homepage": "https://falco.org",
   "icon": "icons/falco.png",
