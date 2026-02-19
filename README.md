@@ -6,9 +6,10 @@
 
 > Language tooling for Falco security rules.
 
-[![CI](https://github.com/falcosecurity/falco-lsp/workflows/Falco%20LSP%20CI/badge.svg)](https://github.com/falcosecurity/falco-lsp/actions)
-[![Build](https://github.com/falcosecurity/falco-lsp/workflows/Build%20Binaries/badge.svg)](https://github.com/falcosecurity/falco-lsp/actions)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Falco Ecosystem Repository](https://raw.githubusercontent.com/falcosecurity/evolution/refs/heads/main/repos/badges/falco-ecosystem-blue.svg)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#ecosystem-scope) [![Incubating](https://img.shields.io/badge/status-incubating-orange?style=for-the-badge)](https://github.com/falcosecurity/evolution/blob/main/REPOSITORIES.md#incubating)
+
+[![License](https://img.shields.io/github/license/falcosecurity/falco-lsp?style=for-the-badge)](./LICENSE)
+[![Last Release](https://img.shields.io/github/v/release/falcosecurity/falco-lsp?style=for-the-badge)](https://github.com/falcosecurity/falco-lsp/releases/latest)
 
 ## Overview
 

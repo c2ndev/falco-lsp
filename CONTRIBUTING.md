@@ -4,7 +4,7 @@ Thank you for your interest in contributing to the Falco LSP project! This docum
 
 ## Code of Conduct
 
-This project follows standard open-source community guidelines. Please be respectful and constructive in all interactions.
+This project follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
 
 ## How to Contribute
 

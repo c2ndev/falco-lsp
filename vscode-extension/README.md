@@ -333,5 +333,5 @@ Apache License 2.0 - See [LICENSE](LICENSE) for details.
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/c2ndev">Alessandro Cannarella</a>
+  Part of the <a href="https://falco.org">Falco</a> ecosystem - a <a href="https://www.cncf.io">CNCF</a> project
 </p>
