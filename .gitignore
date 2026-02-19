@@ -36,7 +36,6 @@ vscode-extension/bin/
 *_STATUS*.md
 *_VERIFICATION*.md
 
-# Package managers - use npm for vscode-extension
-package-lock.json
+# Package managers
 yarn.lock
 pnpm-lock.yaml

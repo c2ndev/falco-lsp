@@ -2,12 +2,12 @@ name: Falco LSP CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "falco-lsp/**"
       - ".github/workflows/go-tests.yml"
   pull_request:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "falco-lsp/**"
       - ".github/workflows/go-tests.yml"

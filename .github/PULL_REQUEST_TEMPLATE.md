@@ -55,4 +55,3 @@ Usage: `Fixes #<issue number>`, or `Fixes (paste link of issue)`.
 Fixes #
 
 **Special notes for your reviewer**:
-
