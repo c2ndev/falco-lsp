@@ -2,13 +2,13 @@ name: VS Code Extension
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "vscode-extension/**"
       - "falco-lsp/**"
       - ".github/workflows/vscode-extension.yml"
   pull_request:
-    branches: [main, master]
+    branches: [main]
     paths:
       - "vscode-extension/**"
       - "falco-lsp/**"
