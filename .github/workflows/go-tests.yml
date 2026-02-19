@@ -3,14 +3,8 @@ name: Falco LSP CI
 on:
   push:
     branches: [main]
-    paths:
-      - "falco-lsp/**"
-      - ".github/workflows/go-tests.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "falco-lsp/**"
-      - ".github/workflows/go-tests.yml"
   workflow_dispatch:
 
 permissions:

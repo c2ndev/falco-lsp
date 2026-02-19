@@ -3,14 +3,8 @@ name: Build Binaries
 on:
   push:
     branches: [main]
-    paths:
-      - "falco-lsp/**"
-      - ".github/workflows/build.yml"
   pull_request:
     branches: [main]
-    paths:
-      - "falco-lsp/**"
-      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 permissions:
